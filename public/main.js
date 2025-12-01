@@ -3,41 +3,68 @@
 const eventsContainer = document.getElementById("events");
 const statusEl = document.getElementById("status");
 const filterButtons = document.querySelectorAll(".filter-btn");
+const datePicker = document.getElementById("date-picker");
+const dateInput = document.getElementById("date-input");
 
+const SEARCH_RADIUS_MILES = 20;
+
+// Button click handling
 filterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     filterButtons.forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
-    fetchAndRender(btn.dataset.range);
+
+    const range = btn.dataset.range;
+
+    if (range === "date") {
+      // Show date picker and wait for user to choose a date
+      datePicker.style.display = "block";
+      eventsContainer.innerHTML = "";
+      statusEl.textContent = "Pick a date to see local shows.";
+    } else {
+      // Hide date picker and load immediately
+      datePicker.style.display = "none";
+      fetchAndRender(range);
+    }
   });
 });
 
+// When the user picks a date, load that day’s shows
+if (dateInput) {
+  dateInput.addEventListener("change", () => {
+    if (!dateInput.value) return;
+    fetchAndRender("date", dateInput.value);
+  });
+}
+
 // Return start/end as ISO8601 strings for Ticketmaster
-function getDateRangeISO(range) {
+function getDateRangeISO(range, specificDate) {
   const now = new Date();
   const start = new Date();
   const end = new Date();
 
   if (range === "tonight") {
-    // roughly "this evening" → now until 3am
-    if (start.getHours() < 15) {
-      // if it's earlier than 3pm, start at 6pm local
+    // Tonight: roughly from now (or 6pm) through 3am
+    const currentHour = start.getHours();
+    if (currentHour < 18) {
       start.setHours(18, 0, 0, 0);
     }
     end.setDate(start.getDate() + 1);
     end.setHours(3, 0, 0, 0);
-  } else if (range === "weekend") {
-    // Friday 00:00 through Sunday 23:59
-    const day = now.getDay(); // 0 = Sunday
-    const diffToFri = (5 - day + 7) % 7;
-    start.setDate(now.getDate() + diffToFri);
+  } else if (range === "week") {
+    // This week: today through 7 days out
     start.setHours(0, 0, 0, 0);
-
-    const diffToSun = (7 - day) % 7;
-    end.setDate(now.getDate() + diffToSun);
+    end.setDate(start.getDate() + 7);
+    end.setHours(23, 59, 59, 999);
+  } else if (range === "date" && specificDate) {
+    // Specific date: full local day
+    const d = new Date(`${specificDate}T00:00:00`);
+    start.setTime(d.getTime());
+    end.setTime(d.getTime());
+    start.setHours(0, 0, 0, 0);
     end.setHours(23, 59, 59, 999);
   } else {
-    // this week: today through 7 days out
+    // Fallback: treat as week
     start.setHours(0, 0, 0, 0);
     end.setDate(start.getDate() + 7);
     end.setHours(23, 59, 59, 999);
@@ -75,7 +102,7 @@ async function getUserLocation() {
   });
 }
 
-async function fetchAndRender(range = "tonight") {
+async function fetchAndRender(range = "tonight", specificDate = null) {
   try {
     statusEl.textContent = "Finding shows near you...";
     eventsContainer.innerHTML = "";
@@ -85,12 +112,12 @@ async function fetchAndRender(range = "tonight") {
       coords = await getUserLocation();
     }
 
-    const { start, end } = getDateRangeISO(range);
+    const { start, end } = getDateRangeISO(range, specificDate);
 
     const params = new URLSearchParams({
       lat: coords.lat,
       lng: coords.lng,
-      radius: 25, // miles
+      radius: SEARCH_RADIUS_MILES,
       startDateTime: start,
       endDateTime: end,
     });
@@ -107,7 +134,7 @@ async function fetchAndRender(range = "tonight") {
 
     if (!events.length) {
       statusEl.textContent =
-        "No local shows found in this range. Try a different filter.";
+        "No local shows found in this range. Try another date or range.";
       return;
     }
 
@@ -219,4 +246,5 @@ function renderEvents(events) {
   });
 }
 
+// Initial load: tonight
 fetchAndRender("tonight");
