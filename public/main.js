@@ -135,9 +135,8 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
       end_date: end.toString(),
     });
 
-    // If you ever want to hardcode your Netlify URL for BuildFire, change this line:
-    // const url = `https://YOUR-SITE-NAME.netlify.app/.netlify/functions/local-events?${params.toString()}`;
-    const url = `/.netlify/functions/local-events?${params.toString()}`;
+ // ✅ use your real Netlify site domain here
+const url = `https://YOUR-SITE-NAME.netlify.app/.netlify/functions/local-events?${params.toString()}`;
 
     const res = await fetch(url);
     if (!res.ok) {
