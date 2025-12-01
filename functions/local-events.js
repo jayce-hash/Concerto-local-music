@@ -2,20 +2,20 @@
 
 exports.handler = async (event) => {
   try {
-    const apiKey = process.env.YELP_API_KEY;
+    const apiKey = process.env.TICKETMASTER_API_KEY;
     if (!apiKey) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: "Missing YELP_API_KEY env var" }),
+        body: JSON.stringify({ error: "Missing TICKETMASTER_API_KEY env var" }),
       };
     }
 
     const params = event.queryStringParameters || {};
     const lat = params.lat;
     const lng = params.lng;
-    const radius = params.radius || 5000; // meters (5km default)
-    const startDate = params.start_date;  // Unix timestamp (optional)
-    const endDate = params.end_date;      // Unix timestamp (optional)
+    const radius = params.radius || "25"; // miles
+    const startDateTime = params.startDateTime; // ISO 8601, optional
+    const endDateTime = params.endDateTime;     // ISO 8601, optional
 
     if (!lat || !lng) {
       return {
@@ -24,63 +24,84 @@ exports.handler = async (event) => {
       };
     }
 
-    const url = new URL("https://api.yelp.com/v3/events");
-    url.searchParams.set("latitude", lat);
-    url.searchParams.set("longitude", lng);
+    const url = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
+    url.searchParams.set("apikey", apiKey);
+    url.searchParams.set("latlong", `${lat},${lng}`);
     url.searchParams.set("radius", radius);
-    url.searchParams.set("categories", "music,festivals,arts");
-    url.searchParams.set("limit", "30");
+    url.searchParams.set("unit", "miles");
+    url.searchParams.set("classificationName", "Music");
+    url.searchParams.set("size", "50");
+    url.searchParams.set("sort", "date,asc");
 
-    if (startDate) url.searchParams.set("start_date", startDate);
-    if (endDate) url.searchParams.set("end_date", endDate);
+    if (startDateTime) url.searchParams.set("startDateTime", startDateTime);
+    if (endDateTime) url.searchParams.set("endDateTime", endDateTime);
 
     const res = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers: { Accept: "application/json" },
     });
 
     if (!res.ok) {
       const text = await res.text();
-      console.error("Yelp error:", res.status, text);
+      console.error("Ticketmaster error:", res.status, text);
       return {
         statusCode: res.status,
-        body: JSON.stringify({ error: "Yelp API error", details: text }),
+        body: JSON.stringify({ error: "Ticketmaster API error", details: text }),
       };
     }
 
     const data = await res.json();
+    const rawEvents =
+      data._embedded && Array.isArray(data._embedded.events)
+        ? data._embedded.events
+        : [];
 
-    const events = (data.events || []).map((ev) => ({
-      id: ev.id,
-      name: ev.name,
-      description: ev.description || "",
-      time_start: ev.time_start,
-      time_end: ev.time_end,
-      cost: ev.cost,
-      cost_max: ev.cost_max,
-      is_free: ev.is_free,
-      category: ev.category,
-      event_site_url: ev.event_site_url,
-      image_url: ev.image_url,
-      attending_count: ev.attending_count,
-      location: ev.location
-        ? {
-            address1: ev.location.address1,
-            city: ev.location.city,
-            state: ev.location.state,
-            zip_code: ev.location.zip_code,
-          }
-        : null,
-    }));
+    const events = rawEvents.map((ev) => {
+      const venue =
+        ev._embedded &&
+        ev._embedded.venues &&
+        ev._embedded.venues[0];
+
+      const image =
+        ev.images && ev.images.length
+          ? ev.images[0]
+          : null;
+
+      const priceRange =
+        ev.priceRanges && ev.priceRanges.length
+          ? ev.priceRanges[0]
+          : null;
+
+      return {
+        id: ev.id,
+        name: ev.name,
+        description: ev.info || ev.pleaseNote || "",
+        time_start:
+          ev.dates &&
+          ev.dates.start &&
+          (ev.dates.start.dateTime || ev.dates.start.localDate),
+        url: ev.url,
+        image_url: image ? image.url : null,
+        venue: venue
+          ? {
+              name: venue.name,
+              address1: venue.address && venue.address.line1,
+              city: venue.city && venue.city.name,
+              state: venue.state && venue.state.stateCode,
+              country: venue.country && venue.country.countryCode,
+            }
+          : null,
+        price_min: priceRange && priceRange.min,
+        price_max: priceRange && priceRange.max,
+      };
+    });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ events }),
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
+      body: JSON.stringify({ events }),
     };
   } catch (err) {
     console.error("Server error", err);
