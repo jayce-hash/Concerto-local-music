@@ -4,83 +4,57 @@ const eventsContainer = document.getElementById("events");
 const statusEl = document.getElementById("status");
 const filterButtons = document.querySelectorAll(".filter-btn");
 const datePicker = document.getElementById("date-picker");
-const dateInput = document.getElementById("date-input");
 
-const SEARCH_RADIUS_MILES = 20;
+// --- Date range helpers ---
 
-// Button click handling
-filterButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    filterButtons.forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const range = btn.dataset.range;
-
-    if (range === "date") {
-      // Show date picker and wait for user to choose a date
-      datePicker.style.display = "block";
-      eventsContainer.innerHTML = "";
-      statusEl.textContent = "Pick a date to see local shows.";
-    } else {
-      // Hide date picker and load immediately
-      datePicker.style.display = "none";
-      fetchAndRender(range);
-    }
-  });
-});
-
-// When the user picks a date, load that day’s shows
-if (dateInput) {
-  dateInput.addEventListener("change", () => {
-    if (!dateInput.value) return;
-    fetchAndRender("date", dateInput.value);
-  });
-}
-
-// Return start/end as ISO8601 strings for Ticketmaster
-function getDateRangeISO(range, specificDate) {
-  const now = new Date();
-  const start = new Date();
-  const end = new Date();
+function getUnixRange(range, options = {}) {
+  let start;
+  let end;
 
   if (range === "tonight") {
-    // Tonight: roughly from now (or 6pm) through 3am
-    const currentHour = start.getHours();
-    if (currentHour < 18) {
-      start.setHours(18, 0, 0, 0);
-    }
-    end.setDate(start.getDate() + 1);
-    end.setHours(3, 0, 0, 0);
+    // tonight: roughly 5pm–4am
+    start = new Date();
+    start.setHours(17, 0, 0, 0);
+
+    end = new Date(start);
+    end.setDate(end.getDate() + 1);
+    end.setHours(4, 0, 0, 0);
   } else if (range === "week") {
-    // This week: today through 7 days out
+    // next 7 days
+    start = new Date();
     start.setHours(0, 0, 0, 0);
-    end.setDate(start.getDate() + 7);
+
+    end = new Date(start);
+    end.setDate(end.getDate() + 7);
     end.setHours(23, 59, 59, 999);
-  } else if (range === "date" && specificDate) {
-    // Specific date: full local day
-    const d = new Date(`${specificDate}T00:00:00`);
-    start.setTime(d.getTime());
-    end.setTime(d.getTime());
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
+  } else if (range === "date" && options.date) {
+    // specific single date
+    start = new Date(options.date + "T00:00:00");
+    end = new Date(options.date + "T23:59:59");
   } else {
-    // Fallback: treat as week
+    // fallback: next 7 days
+    start = new Date();
     start.setHours(0, 0, 0, 0);
-    end.setDate(start.getDate() + 7);
+    end = new Date(start);
+    end.setDate(end.getDate() + 7);
     end.setHours(23, 59, 59, 999);
   }
 
   return {
-    start: start.toISOString(),
-    end: end.toISOString(),
+    start: Math.floor(start.getTime() / 1000),
+    end: Math.floor(end.getTime() / 1000),
   };
 }
+
+// --- Location helpers ---
 
 function getCoordsFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const lat = params.get("lat");
   const lng = params.get("lng");
-  if (lat && lng) return { lat: parseFloat(lat), lng: parseFloat(lng) };
+  if (lat && lng) {
+    return { lat: parseFloat(lat), lng: parseFloat(lng) };
+  }
   return null;
 }
 
@@ -102,7 +76,9 @@ async function getUserLocation() {
   });
 }
 
-async function fetchAndRender(range = "tonight", specificDate = null) {
+// --- Core fetch + render ---
+
+async function fetchAndRender(range = "tonight", options = {}) {
   try {
     statusEl.textContent = "Finding shows near you...";
     eventsContainer.innerHTML = "";
@@ -112,14 +88,14 @@ async function fetchAndRender(range = "tonight", specificDate = null) {
       coords = await getUserLocation();
     }
 
-    const { start, end } = getDateRangeISO(range, specificDate);
+    const { start, end } = getUnixRange(range, options);
 
     const params = new URLSearchParams({
       lat: coords.lat,
       lng: coords.lng,
-      radius: SEARCH_RADIUS_MILES,
-      startDateTime: start,
-      endDateTime: end,
+      radius: 20, // miles
+      start_date: start,
+      end_date: end,
     });
 
     const res = await fetch(
@@ -134,7 +110,7 @@ async function fetchAndRender(range = "tonight", specificDate = null) {
 
     if (!events.length) {
       statusEl.textContent =
-        "No local shows found in this range. Try another date or range.";
+        "No local shows found in this range. Try a different filter or date.";
       return;
     }
 
@@ -154,18 +130,22 @@ function renderEvents(events) {
     const card = document.createElement("article");
     card.className = "event-card";
 
+    // Image
     const img = document.createElement("img");
     img.className = "event-image";
     img.src = ev.image_url || "";
     img.alt = ev.name || "Event image";
 
+    // Main
     const main = document.createElement("div");
     main.className = "event-main";
 
+    // Name
     const nameEl = document.createElement("div");
     nameEl.className = "event-name";
     nameEl.textContent = ev.name || "Live Music";
 
+    // Meta (date + venue)
     const metaEl = document.createElement("div");
     metaEl.className = "event-meta";
 
@@ -180,39 +160,59 @@ function renderEvents(events) {
         })
       : "Time TBA";
 
-    const v = ev.venue;
-    const locStr = v
-      ? [v.name, v.city, v.state].filter(Boolean).join(" • ")
-      : "Venue TBA";
+    const venue = ev.venue || ev.location || null;
+    const locStr = venue
+      ? `${venue.name ? venue.name + " • " : ""}${venue.address1 || ""} ${venue.city || ""}, ${
+          venue.state || ""
+        }`.trim()
+      : "Location TBA";
 
     metaEl.textContent = `${timeStr} • ${locStr}`;
 
+    // Description
     const descEl = document.createElement("div");
     descEl.className = "event-description";
     descEl.textContent = ev.description || "";
 
+    // Tags (price + venue label)
     const tagsEl = document.createElement("div");
     tagsEl.className = "event-tags";
 
-    if (ev.price_min || ev.price_max) {
+    const hasMin = typeof ev.price_min === "number";
+    const hasMax = typeof ev.price_max === "number";
+
+    if (hasMin || hasMax) {
       const pill = document.createElement("span");
       pill.className = "tag-pill";
 
-      const min = ev.price_min ? `$${ev.price_min.toFixed(0)}` : "";
-      const max = ev.price_max ? `$${ev.price_max.toFixed(0)}` : "";
+      if (hasMin && hasMax && ev.price_min === 0 && ev.price_max === 0) {
+        pill.textContent = "Free";
+      } else {
+        const min = hasMin ? `$${Math.round(ev.price_min)}` : "";
+        const max = hasMax ? `$${Math.round(ev.price_max)}` : "";
+        pill.textContent =
+          max && max !== min ? `${min}–${max}` : min || max || "Paid";
+      }
 
-      pill.textContent =
-        min && max && max !== min ? `${min}–${max}` : min || max || "Ticketed";
       tagsEl.appendChild(pill);
     }
 
+    if (venue && venue.name) {
+      const venuePill = document.createElement("span");
+      venuePill.className = "tag-pill";
+      venuePill.textContent = venue.name;
+      tagsEl.appendChild(venuePill);
+    }
+
+    // Actions
     const actions = document.createElement("div");
     actions.className = "event-actions";
 
-    if (ev.url) {
+    const eventUrl = ev.url || ev.event_site_url || null;
+    if (eventUrl) {
       const btn = document.createElement("a");
       btn.className = "btn-outline";
-      btn.href = ev.url;
+      btn.href = eventUrl;
       btn.target = "_blank";
       btn.rel = "noopener noreferrer";
       btn.textContent = "View Event";
@@ -223,17 +223,16 @@ function renderEvents(events) {
     planBtn.className = "btn-outline";
     planBtn.textContent = "Plan Your Night";
     planBtn.addEventListener("click", () => {
-      if (v && (v.address1 || v.name)) {
+      if (venue && venue.address1) {
         const q = encodeURIComponent(
-          `${v.address1 || ""} ${v.name || ""} ${v.city || ""} ${
-            v.state || ""
-          }`
+          `${venue.address1} ${venue.city || ""} ${venue.state || ""}`
         );
         window.open(`https://maps.apple.com/?q=${q}`, "_blank");
       }
     });
     actions.appendChild(planBtn);
 
+    // Assemble
     main.appendChild(nameEl);
     main.appendChild(metaEl);
     main.appendChild(descEl);
@@ -246,5 +245,36 @@ function renderEvents(events) {
   });
 }
 
-// Initial load: tonight
+// --- UI wiring ---
+
+filterButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    filterButtons.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const range = btn.dataset.range;
+    if (range === "date") {
+      if (datePicker.value) {
+        fetchAndRender("date", { date: datePicker.value });
+      } else {
+        statusEl.textContent = "Select a date to see local shows.";
+        datePicker.focus();
+      }
+    } else if (range === "tonight") {
+      fetchAndRender("tonight");
+    } else if (range === "week") {
+      fetchAndRender("week");
+    }
+  });
+});
+
+datePicker.addEventListener("change", () => {
+  if (!datePicker.value) return;
+  filterButtons.forEach((b) => b.classList.remove("active"));
+  const dateBtn = document.querySelector('.filter-btn[data-range="date"]');
+  if (dateBtn) dateBtn.classList.add("active");
+  fetchAndRender("date", { date: datePicker.value });
+});
+
+// Initial load: Tonight
 fetchAndRender("tonight");
