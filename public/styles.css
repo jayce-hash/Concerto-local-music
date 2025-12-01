@@ -1,7 +1,6 @@
-/* Basic page layout */
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   background: #0e1525;
   color: #f8f9f9;
 }
@@ -23,7 +22,6 @@ body {
   font-size: 0.9rem;
 }
 
-/* Filters */
 .filter-row {
   display: flex;
   flex-wrap: wrap;
@@ -56,7 +54,6 @@ body {
   color: #f8f9f9;
 }
 
-/* Status */
 .status-text {
   min-height: 18px;
   font-size: 0.9rem;
@@ -64,14 +61,12 @@ body {
   color: #c0c0c0;
 }
 
-/* Events grid */
 .events-grid {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Event card */
 .event-card {
   display: flex;
   gap: 10px;
@@ -112,7 +107,6 @@ body {
   color: #d5d8dd;
   max-height: 3.5em;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .event-tags {
@@ -129,10 +123,8 @@ body {
   border: 1px solid #c0c0c0;
 }
 
-/* Buttons */
 .event-actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px;
   margin-top: 4px;
 }
@@ -144,26 +136,10 @@ body {
   color: #f8f9f9;
   padding: 4px 10px;
   font-size: 0.8rem;
-  cursor: pointer;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .btn-outline:hover {
   background: #f8f9f9;
   color: #121e36;
-}
-
-/* Mobile tweaks */
-@media (max-width: 600px) {
-  .event-card {
-    align-items: flex-start;
-  }
-
-  .event-image {
-    width: 70px;
-    height: 70px;
-  }
 }
