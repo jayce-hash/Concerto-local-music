@@ -13,9 +13,9 @@ exports.handler = async (event) => {
     const params = event.queryStringParameters || {};
     const lat = params.lat;
     const lng = params.lng;
-    const radius = params.radius || "20"; // miles (default 20)
-    const startDateTime = params.startDateTime; // ISO 8601
-    const endDateTime = params.endDateTime;     // ISO 8601
+    const radius = params.radius ? Number(params.radius) : 20; // miles
+    const startSec = params.start_date ? Number(params.start_date) : null;
+    const endSec = params.end_date ? Number(params.end_date) : null;
 
     if (!lat || !lng) {
       return {
@@ -24,22 +24,27 @@ exports.handler = async (event) => {
       };
     }
 
-    const url = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
-    url.searchParams.set("apikey", apiKey);
-    url.searchParams.set("latlong", `${lat},${lng}`);
-    url.searchParams.set("radius", radius);
-    url.searchParams.set("unit", "miles");
-    url.searchParams.set("classificationName", "Music");
-    url.searchParams.set("size", "100");
-    url.searchParams.set("sort", "date,asc");
+    const searchParams = new URLSearchParams();
+    searchParams.set("apikey", apiKey);
+    searchParams.set("latlong", `${lat},${lng}`);
+    searchParams.set("radius", radius.toString());
+    searchParams.set("unit", "miles");
+    searchParams.set("classificationName", "Music");
+    searchParams.set("size", "100");
+    searchParams.set("sort", "date,asc");
 
-    if (startDateTime) url.searchParams.set("startDateTime", startDateTime);
-    if (endDateTime) url.searchParams.set("endDateTime", endDateTime);
+    if (startSec) {
+      const iso = new Date(startSec * 1000).toISOString();
+      searchParams.set("startDateTime", iso);
+    }
+    if (endSec) {
+      const iso = new Date(endSec * 1000).toISOString();
+      searchParams.set("endDateTime", iso);
+    }
 
-    const res = await fetch(url.toString(), {
-      headers: { Accept: "application/json" },
-    });
+    const url = `https://app.ticketmaster.com/discovery/v2/events.json?${searchParams.toString()}`;
 
+    const res = await fetch(url);
     if (!res.ok) {
       const text = await res.text();
       console.error("Ticketmaster error:", res.status, text);
@@ -49,38 +54,34 @@ exports.handler = async (event) => {
       };
     }
 
-    const data = await res.json();
-    const rawEvents =
-      data._embedded && Array.isArray(data._embedded.events)
-        ? data._embedded.events
-        : [];
+    const body = await res.json();
+    const tmEvents = body?._embedded?.events || [];
 
-    const events = rawEvents.map((ev) => {
+    const events = tmEvents.map((ev) => {
       const venue =
-        ev._embedded &&
-        ev._embedded.venues &&
-        ev._embedded.venues[0];
+        ev._embedded && ev._embedded.venues && ev._embedded.venues[0]
+          ? ev._embedded.venues[0]
+          : null;
 
       const image =
-        ev.images && ev.images.length
-          ? ev.images[0]
-          : null;
+        Array.isArray(ev.images) && ev.images.length ? ev.images[0].url : null;
 
-      const priceRange =
-        ev.priceRanges && ev.priceRanges.length
+      const price =
+        Array.isArray(ev.priceRanges) && ev.priceRanges[0]
           ? ev.priceRanges[0]
           : null;
+
+      const dates = ev.dates && ev.dates.start;
+      const timeStart =
+        (dates && (dates.dateTime || dates.dateTBD || dates.localDate)) || null;
 
       return {
         id: ev.id,
         name: ev.name,
         description: ev.info || ev.pleaseNote || "",
-        time_start:
-          ev.dates &&
-          ev.dates.start &&
-          (ev.dates.start.dateTime || ev.dates.start.localDate),
+        time_start: timeStart,
         url: ev.url,
-        image_url: image ? image.url : null,
+        image_url: image,
         venue: venue
           ? {
               name: venue.name,
@@ -90,19 +91,9 @@ exports.handler = async (event) => {
               country: venue.country && venue.country.countryCode,
             }
           : null,
-        price_min: priceRange && priceRange.min,
-        price_max: priceRange && priceRange.max,
+        price_min: price ? price.min : null,
+        price_max: price ? price.max : null,
       };
-    });
-
-    // 🧹 Try to remove big tours / massive venues
-    const bigVenuePattern =
-      /(stadium|arena|coliseum|ballpark|speedway|raceway|amphitheatre|amphitheater|field|dome|center|centre)$/i;
-
-    const filtered = events.filter((ev) => {
-      if (!ev.venue || !ev.venue.name) return true;
-      const name = ev.venue.name.trim();
-      return !bigVenuePattern.test(name);
     });
 
     return {
@@ -111,7 +102,7 @@ exports.handler = async (event) => {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify({ events: filtered }),
+      body: JSON.stringify({ events }),
     };
   } catch (err) {
     console.error("Server error", err);
