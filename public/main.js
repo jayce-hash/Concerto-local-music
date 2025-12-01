@@ -12,17 +12,23 @@ filterButtons.forEach((btn) => {
   });
 });
 
-function getUnixRange(range) {
+// Return start/end as ISO8601 strings for Ticketmaster
+function getDateRangeISO(range) {
   const now = new Date();
   const start = new Date();
   const end = new Date();
 
   if (range === "tonight") {
-    start.setMinutes(0, 0, 0);
+    // roughly "this evening" → now until 3am
+    if (start.getHours() < 15) {
+      // if it's earlier than 3pm, start at 6pm local
+      start.setHours(18, 0, 0, 0);
+    }
     end.setDate(start.getDate() + 1);
     end.setHours(3, 0, 0, 0);
   } else if (range === "weekend") {
-    const day = now.getDay(); // 0=Sun
+    // Friday 00:00 through Sunday 23:59
+    const day = now.getDay(); // 0 = Sunday
     const diffToFri = (5 - day + 7) % 7;
     start.setDate(now.getDate() + diffToFri);
     start.setHours(0, 0, 0, 0);
@@ -31,14 +37,15 @@ function getUnixRange(range) {
     end.setDate(now.getDate() + diffToSun);
     end.setHours(23, 59, 59, 999);
   } else {
+    // this week: today through 7 days out
     start.setHours(0, 0, 0, 0);
     end.setDate(start.getDate() + 7);
     end.setHours(23, 59, 59, 999);
   }
 
   return {
-    start: Math.floor(start.getTime() / 1000),
-    end: Math.floor(end.getTime() / 1000),
+    start: start.toISOString(),
+    end: end.toISOString(),
   };
 }
 
@@ -51,44 +58,18 @@ function getCoordsFromUrl() {
 }
 
 async function getUserLocation() {
-  const fromUrl = getCoordsFromUrl();
-  if (fromUrl) {
-    console.log("Using coords from URL:", fromUrl);
-    return fromUrl;
-  }
-
-  if (!("geolocation" in navigator)) {
-    throw new Error("Geolocation is not supported in this browser.");
-  }
-
   return new Promise((resolve, reject) => {
-    let finished = false;
-
-    const timeoutId = setTimeout(() => {
-      if (finished) return;
-      finished = true;
-      reject(new Error("Location request timed out. Check permissions in Settings."));
-    }, 10000);
-
+    if (!navigator.geolocation) {
+      return reject(new Error("Geolocation not supported"));
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timeoutId);
-        const coords = {
+        resolve({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-        };
-        console.log("Got coords from geolocation:", coords);
-        resolve(coords);
+        });
       },
-      (err) => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timeoutId);
-        console.error("Geolocation error:", err);
-        reject(err);
-      },
+      (err) => reject(err),
       { enableHighAccuracy: true, timeout: 8000 }
     );
   });
@@ -99,51 +80,49 @@ async function fetchAndRender(range = "tonight") {
     statusEl.textContent = "Finding shows near you...";
     eventsContainer.innerHTML = "";
 
-    const coords = await getUserLocation();
+    let coords = getCoordsFromUrl();
+    if (!coords) {
+      coords = await getUserLocation();
+    }
 
-    const { start, end } = getUnixRange(range);
+    const { start, end } = getDateRangeISO(range);
 
     const params = new URLSearchParams({
       lat: coords.lat,
       lng: coords.lng,
-      radius: 5000,
-      start_date: start,
-      end_date: end,
+      radius: 25, // miles
+      startDateTime: start,
+      endDateTime: end,
     });
 
-    const res = await fetch(`/.netlify/functions/local-events?${params.toString()}`);
+    const res = await fetch(
+      `/.netlify/functions/local-events?${params.toString()}`
+    );
     if (!res.ok) {
-      const text = await res.text();
-      console.error("API error response:", res.status, text);
-      throw new Error(`API request failed (${res.status})`);
+      throw new Error("API request failed");
     }
 
     const data = await res.json();
     const events = data.events || [];
 
     if (!events.length) {
-      statusEl.textContent = "No local shows found in this range. Try a different filter.";
+      statusEl.textContent =
+        "No local shows found in this range. Try a different filter.";
       return;
     }
 
     statusEl.textContent = `Showing ${events.length} local performances.`;
     renderEvents(events);
   } catch (err) {
-    console.error("Location or API error:", err);
-
-    let msg = "We couldn't load local shows.";
-    if (err.code === 1) {
-      msg =
-        "We couldn't access your location. Please allow location for Safari / Concerto in Settings and reload.";
-    } else if (err.message) {
-      msg = `We couldn't load local shows: ${err.message}`;
-    }
-    statusEl.textContent = msg;
+    console.error(err);
+    statusEl.textContent =
+      "We couldn't load local shows. Please check location permissions and try again.";
   }
 }
 
 function renderEvents(events) {
   eventsContainer.innerHTML = "";
+
   events.forEach((ev) => {
     const card = document.createElement("article");
     card.className = "event-card";
@@ -174,10 +153,10 @@ function renderEvents(events) {
         })
       : "Time TBA";
 
-    const loc = ev.location;
-    const locStr = loc
-      ? `${loc.address1 || ""} ${loc.city || ""}, ${loc.state || ""}`.trim()
-      : "Location TBA";
+    const v = ev.venue;
+    const locStr = v
+      ? [v.name, v.city, v.state].filter(Boolean).join(" • ")
+      : "Venue TBA";
 
     metaEl.textContent = `${timeStr} • ${locStr}`;
 
@@ -188,34 +167,25 @@ function renderEvents(events) {
     const tagsEl = document.createElement("div");
     tagsEl.className = "event-tags";
 
-    if (ev.is_free) {
+    if (ev.price_min || ev.price_max) {
       const pill = document.createElement("span");
       pill.className = "tag-pill";
-      pill.textContent = "Free";
-      tagsEl.appendChild(pill);
-    } else if (ev.cost || ev.cost_max) {
-      const pill = document.createElement("span");
-      pill.className = "tag-pill";
-      const min = ev.cost ? `$${ev.cost.toFixed(0)}` : "";
-      const max = ev.cost_max ? `$${ev.cost_max.toFixed(0)}` : "";
-      pill.textContent = max && max !== min ? `${min}–${max}` : min || "Paid";
-      tagsEl.appendChild(pill);
-    }
 
-    if (ev.category) {
-      const pill = document.createElement("span");
-      pill.className = "tag-pill";
-      pill.textContent = ev.category;
+      const min = ev.price_min ? `$${ev.price_min.toFixed(0)}` : "";
+      const max = ev.price_max ? `$${ev.price_max.toFixed(0)}` : "";
+
+      pill.textContent =
+        min && max && max !== min ? `${min}–${max}` : min || max || "Ticketed";
       tagsEl.appendChild(pill);
     }
 
     const actions = document.createElement("div");
     actions.className = "event-actions";
 
-    if (ev.event_site_url) {
+    if (ev.url) {
       const btn = document.createElement("a");
       btn.className = "btn-outline";
-      btn.href = ev.event_site_url;
+      btn.href = ev.url;
       btn.target = "_blank";
       btn.rel = "noopener noreferrer";
       btn.textContent = "View Event";
@@ -226,9 +196,11 @@ function renderEvents(events) {
     planBtn.className = "btn-outline";
     planBtn.textContent = "Plan Your Night";
     planBtn.addEventListener("click", () => {
-      if (ev.location && ev.location.address1) {
+      if (v && (v.address1 || v.name)) {
         const q = encodeURIComponent(
-          `${ev.location.address1} ${ev.location.city || ""} ${ev.location.state || ""}`
+          `${v.address1 || ""} ${v.name || ""} ${v.city || ""} ${
+            v.state || ""
+          }`
         );
         window.open(`https://maps.apple.com/?q=${q}`, "_blank");
       }
