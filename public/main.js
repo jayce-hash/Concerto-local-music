@@ -51,18 +51,44 @@ function getCoordsFromUrl() {
 }
 
 async function getUserLocation() {
+  const fromUrl = getCoordsFromUrl();
+  if (fromUrl) {
+    console.log("Using coords from URL:", fromUrl);
+    return fromUrl;
+  }
+
+  if (!("geolocation" in navigator)) {
+    throw new Error("Geolocation is not supported in this browser.");
+  }
+
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      return reject(new Error("Geolocation not supported"));
-    }
+    let finished = false;
+
+    const timeoutId = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      reject(new Error("Location request timed out. Check permissions in Settings."));
+    }, 10000);
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        resolve({
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        const coords = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-        });
+        };
+        console.log("Got coords from geolocation:", coords);
+        resolve(coords);
       },
-      (err) => reject(err),
+      (err) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        console.error("Geolocation error:", err);
+        reject(err);
+      },
       { enableHighAccuracy: true, timeout: 8000 }
     );
   });
@@ -73,10 +99,7 @@ async function fetchAndRender(range = "tonight") {
     statusEl.textContent = "Finding shows near you...";
     eventsContainer.innerHTML = "";
 
-    let coords = getCoordsFromUrl();
-    if (!coords) {
-      coords = await getUserLocation();
-    }
+    const coords = await getUserLocation();
 
     const { start, end } = getUnixRange(range);
 
@@ -90,8 +113,11 @@ async function fetchAndRender(range = "tonight") {
 
     const res = await fetch(`/.netlify/functions/local-events?${params.toString()}`);
     if (!res.ok) {
-      throw new Error("API request failed");
+      const text = await res.text();
+      console.error("API error response:", res.status, text);
+      throw new Error(`API request failed (${res.status})`);
     }
+
     const data = await res.json();
     const events = data.events || [];
 
@@ -103,9 +129,16 @@ async function fetchAndRender(range = "tonight") {
     statusEl.textContent = `Showing ${events.length} local performances.`;
     renderEvents(events);
   } catch (err) {
-    console.error(err);
-    statusEl.textContent =
-      "We couldn't load local shows. Please check location permissions and try again.";
+    console.error("Location or API error:", err);
+
+    let msg = "We couldn't load local shows.";
+    if (err.code === 1) {
+      msg =
+        "We couldn't access your location. Please allow location for Safari / Concerto in Settings and reload.";
+    } else if (err.message) {
+      msg = `We couldn't load local shows: ${err.message}`;
+    }
+    statusEl.textContent = msg;
   }
 }
 
