@@ -2,39 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Concerto · Local Music</title>
+    <title>Concerto • Local Shows</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="page">
-      <header class="page-header">
-        <h1 class="page-title">Local Music</h1>
-        <p class="page-subtitle">
-          Find live music at bars, clubs, and small venues around you.
-        </p>
+    <div class="app">
+      <header class="app-header">
+        <h1>Local Performances</h1>
+        <p>Find live music within ~20 miles of your location.</p>
       </header>
 
-  <section class="filters">
-  <button class="filter-btn active" data-range="tonight">Tonight</button>
-  <button class="filter-btn" data-range="week">This Week</button>
-  <button class="filter-btn" data-range="date">Select a Date</button>
-</section>
+      <section class="controls">
+        <div class="tabs">
+          <button class="filter-btn active" data-range="tonight">
+            Tonight
+          </button>
+          <button class="filter-btn" data-range="week">
+            This Week
+          </button>
+          <button class="filter-btn" data-range="date">
+            Select a Date
+          </button>
+        </div>
 
-<section id="date-picker" class="date-picker" style="display: none;">
-  <label>
-    Choose a date:
-    <input type="date" id="date-input" />
-  </label>
-</section>
+        <div class="date-picker-wrapper">
+          <label for="date-picker">Pick a date</label>
+          <input type="date" id="date-picker" />
+        </div>
 
-<section class="status-bar">
-  <span id="status">Finding shows near you...</span>
-</section>
+        <div id="status" class="status">
+          Finding shows near you...
+        </div>
+      </section>
 
-<section id="events" class="events-list"></section>
-    </main>
+      <main id="events" class="events"></main>
+    </div>
 
-    <script src="main.js"></script>
+    <script src="main.js" defer></script>
   </body>
 </html>
