@@ -13,9 +13,9 @@ exports.handler = async (event) => {
     const params = event.queryStringParameters || {};
     const lat = params.lat;
     const lng = params.lng;
-    const radius = params.radius || "25"; // miles
-    const startDateTime = params.startDateTime; // ISO 8601, optional
-    const endDateTime = params.endDateTime;     // ISO 8601, optional
+    const radius = params.radius || "20"; // miles (default 20)
+    const startDateTime = params.startDateTime; // ISO 8601
+    const endDateTime = params.endDateTime;     // ISO 8601
 
     if (!lat || !lng) {
       return {
@@ -30,7 +30,7 @@ exports.handler = async (event) => {
     url.searchParams.set("radius", radius);
     url.searchParams.set("unit", "miles");
     url.searchParams.set("classificationName", "Music");
-    url.searchParams.set("size", "50");
+    url.searchParams.set("size", "100");
     url.searchParams.set("sort", "date,asc");
 
     if (startDateTime) url.searchParams.set("startDateTime", startDateTime);
@@ -95,13 +95,23 @@ exports.handler = async (event) => {
       };
     });
 
+    // 🧹 Try to remove big tours / massive venues
+    const bigVenuePattern =
+      /(stadium|arena|coliseum|ballpark|speedway|raceway|amphitheatre|amphitheater|field|dome|center|centre)$/i;
+
+    const filtered = events.filter((ev) => {
+      if (!ev.venue || !ev.venue.name) return true;
+      const name = ev.venue.name.trim();
+      return !bigVenuePattern.test(name);
+    });
+
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify({ events }),
+      body: JSON.stringify({ events: filtered }),
     };
   } catch (err) {
     console.error("Server error", err);
