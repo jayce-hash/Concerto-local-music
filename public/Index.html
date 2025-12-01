@@ -1,1 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Concerto – Local Music</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <h1>LOCAL MUSIC</h1>
+      <p>Discover live performances at bars, clubs, and lounges around you.</p>
+    </header>
 
+    <section class="filters">
+      <button data-range="tonight" class="filter-btn active">Tonight</button>
+      <button data-range="weekend" class="filter-btn">This Weekend</button>
+      <button data-range="week" class="filter-btn">This Week</button>
+    </section>
+
+    <section id="status" class="status">
+      Finding shows near you...
+    </section>
+
+    <section id="events" class="events"></section>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
