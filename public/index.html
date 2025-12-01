@@ -15,17 +15,24 @@
         </p>
       </header>
 
-      <section class="filters">
-        <button class="filter-btn active" data-range="tonight">Tonight</button>
-        <button class="filter-btn" data-range="weekend">This Weekend</button>
-        <button class="filter-btn" data-range="week">This Week</button>
-      </section>
+  <section class="filters">
+  <button class="filter-btn active" data-range="tonight">Tonight</button>
+  <button class="filter-btn" data-range="week">This Week</button>
+  <button class="filter-btn" data-range="date">Select a Date</button>
+</section>
 
-      <section class="status-bar">
-        <span id="status">Finding shows near you...</span>
-      </section>
+<section id="date-picker" class="date-picker" style="display: none;">
+  <label>
+    Choose a date:
+    <input type="date" id="date-input" />
+  </label>
+</section>
 
-      <section id="events" class="events-list"></section>
+<section class="status-bar">
+  <span id="status">Finding shows near you...</span>
+</section>
+
+<section id="events" class="events-list"></section>
     </main>
 
     <script src="main.js"></script>
