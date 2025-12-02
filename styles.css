@@ -53,7 +53,7 @@ h1, h2, h3 {
 }
 
 h1 {
-  font-size: clamp(28px, 4vw, 38px);
+  font-size: clamp(26px, 4vw, 36px);
   margin: 0 0 var(--s-3);
 }
 h2 {
@@ -61,7 +61,7 @@ h2 {
   margin: 0 0 var(--s-2);
 }
 h3 {
-  font-size: clamp(18px, 2.2vw, 22px);
+  font-size: clamp(16px, 2.2vw, 20px);
   margin: 0 0 var(--s-2);
 }
 
@@ -89,7 +89,7 @@ label {
 .container {
   width: min(960px, 92vw);
   margin: 0 auto;
-  padding: var(--s-6) 0 var(--s-5);
+  padding: var(--s-5) 0 var(--s-5);
 }
 .container.narrow {
   width: min(780px, 92vw);
@@ -108,7 +108,7 @@ label {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--r-16);
-  padding: var(--s-5);
+  padding: var(--s-4);
   box-shadow: var(--shadow);
 }
 
@@ -129,7 +129,7 @@ label {
   background: #FFF;
   border: 1px solid var(--line);
   border-radius: var(--r-16);
-  padding: 18px;
+  padding: 16px;
 }
 .form-grid.two {
   grid-template-columns: 2fr 1.5fr;
@@ -146,11 +146,11 @@ select {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--r-14);
-  padding: .78rem .9rem;
-  min-height: 44px;
+  padding: .7rem .85rem;
+  min-height: 40px;
   outline: none;
   transition: border-color .14s, box-shadow .18s, background .18s;
-  font-size: .95rem;
+  font-size: .9rem;
 }
 
 input::placeholder {
@@ -165,8 +165,13 @@ select:focus {
 
 .tiny {
   color: var(--muted);
-  font-size: .9rem;
+  font-size: .85rem;
   margin-top: 6px;
+}
+
+/* Category field */
+.category-field {
+  margin-top: var(--s-3);
 }
 
 /* ===== Suggest (autocomplete) ===== */
@@ -193,14 +198,14 @@ select:focus {
   border-radius: 10px;
   cursor: pointer;
   color: var(--ink);
-  font-size: .95rem;
+  font-size: .92rem;
 }
 .suggest-item strong {
   font-weight: 600;
 }
 .suggest-item span {
   color: var(--muted);
-  font-size: .9rem;
+  font-size: .85rem;
 }
 .suggest-item:hover {
   background: #F2F5FA;
@@ -209,8 +214,8 @@ select:focus {
 /* ===== Buttons ===== */
 .btn {
   appearance: none;
-  min-height: 44px;
-  padding: .72rem 1.1rem;
+  min-height: 40px;
+  padding: .6rem .9rem;
   border-radius: var(--r-14);
   border: 1px solid var(--line);
   color: var(--ink);
@@ -218,7 +223,7 @@ select:focus {
   cursor: pointer;
   transition: transform .12s, box-shadow .2s, border-color .2s, background .2s;
   font-family: 'Lora', Georgia, serif;
-  font-size: .95rem;
+  font-size: .9rem;
 }
 .btn:hover {
   transform: translateY(-1px);
@@ -238,8 +243,8 @@ select:focus {
   background: linear-gradient(135deg,var(--accent),var(--accent-2));
   border: none;
   border-radius: 999px;
-  padding: .95rem 1.6rem;
-  min-height: 48px;
+  padding: .85rem 1.4rem;
+  min-height: 44px;
   box-shadow: 0 10px 22px rgba(18,30,54,.12);
 }
 .btn-cta:hover {
@@ -260,7 +265,7 @@ select:focus {
   margin-top: var(--s-3);
 }
 .status {
-  font-size: .9rem;
+  font-size: .85rem;
 }
 
 /* ===== More Filters ===== */
@@ -313,9 +318,23 @@ select:focus {
   text-transform: uppercase;
   letter-spacing: .08em;
   font-weight: 400;
-  font-size: .9rem;
+  font-size: .85rem;
   margin: 0;
   color: var(--muted);
+}
+
+.sub-label {
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Category-specific groups */
+.category-filters {
+  display: none;
+}
+.category-filters.active {
+  display: flex;
 }
 
 /* Pills */
@@ -329,15 +348,15 @@ select:focus {
   display: inline-flex;
   align-items: center;
   gap: .4ch;
-  padding: .5rem .9rem;
-  min-height: 34px;
+  padding: .45rem .85rem;
+  min-height: 32px;
   border-radius: 999px;
   border: 1px solid #E1E7F0;
   background: linear-gradient(180deg,#FFF,#F6F8FB);
   color: var(--ink);
   cursor: pointer;
   transition: border-color .14s, box-shadow .18s, background .18s, transform .12s;
-  font-size: .88rem;
+  font-size: .85rem;
   user-select: none;
 }
 .pill:hover {
@@ -391,7 +410,7 @@ select:focus {
 .event-title {
   font-family: 'Lora', Georgia, serif;
   font-weight: 600;
-  font-size: 1.02rem;
+  font-size: 1.0rem;
   margin: 0 0 4px;
 }
 
@@ -446,8 +465,8 @@ select:focus {
 
 /* ===== Loading spinner ===== */
 .spinner {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
   border: 3px solid var(--line);
   border-top-color: var(--accent);
@@ -462,7 +481,7 @@ select:focus {
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .container {
-    padding: var(--s-5) 0 var(--s-4);
+    padding: var(--s-4) 0 var(--s-4);
   }
   .page-head {
     text-align: center;
@@ -494,8 +513,11 @@ select:focus {
   }
   input[type="text"],
   input[type="date"] {
-    min-height: 40px;
-    padding: .65rem .8rem;
-    font-size: .9rem;
+    min-height: 38px;
+    padding: .65rem .75rem;
+    font-size: .88rem;
+  }
+  .event-card {
+    padding: var(--s-3);
   }
 }
