@@ -200,13 +200,6 @@ select:focus {
   color: var(--ink);
   font-size: .92rem;
 }
-.suggest-item strong {
-  font-weight: 600;
-}
-.suggest-item span {
-  color: var(--muted);
-  font-size: .85rem;
-}
 .suggest-item:hover {
   background: #F2F5FA;
 }
@@ -305,6 +298,10 @@ select:focus {
   display: flex;
   flex-direction: column;
   gap: var(--s-3);
+}
+
+#moreFilters[hidden] {
+  display: none !important;
 }
 
 .filter-group {
@@ -440,17 +437,6 @@ select:focus {
   align-items: center;
   gap: .75rem;
   margin-top: 6px;
-}
-
-.venue-tag {
-  padding: 0.22rem 0.8rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg,#FFF,#F6F8FB);
-  font-size: .78rem;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--muted);
 }
 
 .ticket-link {
