@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Local Music Finder</title>
+  <title>Events Near Me</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Fonts to match Concerto+ -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -18,19 +18,20 @@
 <body>
   <div class="container narrow">
     <header class="page-head">
-      <h1>Local Music Finder</h1>
+      <h1>Events Near Me</h1>
       <p class="muted">
-        Discover small local shows at bars, clubs, and lounges &mdash; no arenas, no giant stadiums.
+        Search concerts, sports, comedy, festivals, theater and more in any city. Pick your date, choose your vibe, and go.
       </p>
     </header>
 
     <!-- Search Card -->
     <section class="card search-card">
-      <h2 class="step-title">Search for local shows</h2>
+      <h2 class="step-title">Find events</h2>
       <p class="step-help">
-        Start typing your city and state (e.g. “Austin, TX”), choose a date, and we’ll pull small venue music events from Ticketmaster.
+        Start with your city and date, then choose what you’re looking for. We’ll pull live events from Ticketmaster.
       </p>
 
+      <!-- City / State + Date -->
       <div class="form-grid two">
         <!-- City + State with suggestions -->
         <div class="field suggest full">
@@ -43,7 +44,7 @@
           />
           <div id="locationSuggestions" class="suggest-list" hidden></div>
           <p class="tiny">
-            Powered by Ticketmaster venues. Pick a suggestion for best results.
+            Powered by Ticketmaster. Pick a suggestion for best results.
           </p>
         </div>
 
@@ -55,8 +56,20 @@
             id="dateInput"
           />
           <p class="tiny">
-            Leave empty to see upcoming shows; choose a date to narrow it down.
+            Leave empty to see upcoming events; choose a date to narrow it down.
           </p>
+        </div>
+      </div>
+
+      <!-- Category selection -->
+      <div class="field category-field">
+        <label>What are you looking for?</label>
+        <div class="radio-group segmented" id="categoryFilters">
+          <button type="button" class="pill active" data-cat="music">Live Music</button>
+          <button type="button" class="pill" data-cat="sports">Sports</button>
+          <button type="button" class="pill" data-cat="comedy">Comedy</button>
+          <button type="button" class="pill" data-cat="festivals">Festivals</button>
+          <button type="button" class="pill" data-cat="theater">Theater</button>
         </div>
       </div>
 
@@ -71,10 +84,12 @@
 
       <!-- More Filters panel -->
       <div id="moreFilters" class="more-filters-panel" hidden>
-        <!-- Genre -->
-        <div class="filter-group">
-          <h3 class="filter-title">Genre</h3>
-          <div class="radio-group" id="genreFilters">
+        <!-- Category-specific filters -->
+        <!-- Live Music -->
+        <div class="filter-group category-filters active" data-category="music">
+          <h3 class="filter-title">Live music filters</h3>
+          <div class="sub-label">Genre</div>
+          <div class="radio-group" id="musicGenreFilters">
             <button type="button" class="pill" data-genre="pop">Pop</button>
             <button type="button" class="pill" data-genre="rock">Rock</button>
             <button type="button" class="pill" data-genre="hiphop">Rap / Hip-Hop</button>
@@ -85,9 +100,63 @@
             <button type="button" class="pill" data-genre="jazz">Jazz</button>
             <button type="button" class="pill" data-genre="latin">Latin</button>
           </div>
+          <div class="sub-label">Venue size</div>
+          <div class="radio-group" id="musicVenueFilters">
+            <button type="button" class="pill" data-small-venues="true">Small venues only (bars &amp; clubs)</button>
+          </div>
         </div>
 
-        <!-- Time of Night -->
+        <!-- Sports -->
+        <div class="filter-group category-filters" data-category="sports">
+          <h3 class="filter-title">Sports filters</h3>
+          <div class="sub-label">Sport</div>
+          <div class="radio-group" id="sportsTypeFilters">
+            <button type="button" class="pill" data-sport="basketball">Basketball</button>
+            <button type="button" class="pill" data-sport="football">Football</button>
+            <button type="button" class="pill" data-sport="baseball">Baseball</button>
+            <button type="button" class="pill" data-sport="hockey">Hockey</button>
+            <button type="button" class="pill" data-sport="soccer">Soccer</button>
+            <button type="button" class="pill" data-sport="other">Other</button>
+          </div>
+          <div class="sub-label">Level</div>
+          <div class="radio-group segmented" id="sportsLevelFilters">
+            <button type="button" class="pill active" data-level="any">Any</button>
+            <button type="button" class="pill" data-level="pro">Pro</button>
+            <button type="button" class="pill" data-level="college">College</button>
+          </div>
+        </div>
+
+        <!-- Comedy -->
+        <div class="filter-group category-filters" data-category="comedy">
+          <h3 class="filter-title">Comedy filters</h3>
+          <div class="radio-group" id="comedyTypeFilters">
+            <button type="button" class="pill" data-comedy="standup">Stand-up</button>
+            <button type="button" class="pill" data-comedy="improv">Improv</button>
+            <button type="button" class="pill" data-comedy="club">Comedy club</button>
+          </div>
+        </div>
+
+        <!-- Festivals -->
+        <div class="filter-group category-filters" data-category="festivals">
+          <h3 class="filter-title">Festival filters</h3>
+          <div class="radio-group" id="festivalTypeFilters">
+            <button type="button" class="pill" data-fest="music">Music festivals</button>
+            <button type="button" class="pill" data-fest="food">Food &amp; drink</button>
+            <button type="button" class="pill" data-fest="cultural">Fairs &amp; cultural events</button>
+          </div>
+        </div>
+
+        <!-- Theater -->
+        <div class="filter-group category-filters" data-category="theater">
+          <h3 class="filter-title">Theater filters</h3>
+          <div class="radio-group" id="theaterTypeFilters">
+            <button type="button" class="pill" data-theater="musical">Musicals</button>
+            <button type="button" class="pill" data-theater="play">Plays</button>
+            <button type="button" class="pill" data-theater="family">Family-friendly</button>
+          </div>
+        </div>
+
+        <!-- Shared filters: time + price -->
         <div class="filter-group">
           <h3 class="filter-title">Time of night</h3>
           <div class="radio-group segmented" id="timeFilters">
@@ -98,7 +167,6 @@
           </div>
         </div>
 
-        <!-- Price -->
         <div class="filter-group">
           <h3 class="filter-title">Price</h3>
           <div class="radio-group segmented" id="priceFilters">
@@ -112,7 +180,7 @@
 
       <div class="search-actions">
         <button type="button" id="searchBtn" class="btn-cta">
-          Find Shows
+          Find Events
         </button>
         <div id="status" class="status muted"></div>
       </div>
@@ -124,7 +192,7 @@
         <div>
           <h2>Results</h2>
           <p id="resultsSummary" class="muted">
-            Enter a city &amp; state to see what’s playing nearby.
+            Enter a city &amp; state to see what’s happening nearby.
           </p>
         </div>
       </div>
