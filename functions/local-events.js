@@ -1,114 +1,114 @@
-// functions/local-events.js
+// netlify/functions/local-events.js
+
+const TM_API_KEY = process.env.TM_API_KEY; // set this in Netlify env
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+};
 
 exports.handler = async (event) => {
+  // Handle preflight
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: "",
+    };
+  }
+
   try {
-    const apiKey = process.env.TICKETMASTER_API_KEY;
-    if (!apiKey) {
+    const qs = event.queryStringParameters || {};
+    const city = qs.city;
+    const state = qs.state;
+    const startUnix = qs.start_date;
+    const endUnix = qs.end_date;
+
+    if (!TM_API_KEY) {
+      console.error("TM_API_KEY not set");
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: "Missing TICKETMASTER_API_KEY env var" }),
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Server not configured" }),
       };
     }
 
-    const params = event.queryStringParameters || {};
-    const lat = params.lat;
-    const lng = params.lng;
-    const radius = params.radius ? Number(params.radius) : 20; // miles
-    const startSec = params.start_date ? Number(params.start_date) : null;
-    const endSec = params.end_date ? Number(params.end_date) : null;
-
-    if (!lat || !lng) {
+    if (!city || !state || !startUnix || !endUnix) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "lat and lng are required" }),
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Missing city, state, or date range" }),
       };
     }
 
-    const searchParams = new URLSearchParams();
-    searchParams.set("apikey", apiKey);
-    searchParams.set("latlong", `${lat},${lng}`);
-    searchParams.set("radius", radius.toString());
-    searchParams.set("unit", "miles");
-    searchParams.set("classificationName", "Music");
-    searchParams.set("size", "100");
-    searchParams.set("sort", "date,asc");
+    const startIso = new Date(Number(startUnix) * 1000).toISOString();
+    const endIso = new Date(Number(endUnix) * 1000).toISOString();
 
-    if (startSec) {
-      const iso = new Date(startSec * 1000).toISOString();
-      searchParams.set("startDateTime", iso);
-    }
-    if (endSec) {
-      const iso = new Date(endSec * 1000).toISOString();
-      searchParams.set("endDateTime", iso);
-    }
+    const tmUrl = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
+    tmUrl.searchParams.set("apikey", TM_API_KEY);
+    tmUrl.searchParams.set("city", city);
+    tmUrl.searchParams.set("stateCode", state);
+    tmUrl.searchParams.set("countryCode", "US");
+    tmUrl.searchParams.set("startDateTime", startIso);
+    tmUrl.searchParams.set("endDateTime", endIso);
+    tmUrl.searchParams.set("sort", "date,asc");
+    tmUrl.searchParams.set("size", "100");
 
-    const url = `https://app.ticketmaster.com/discovery/v2/events.json?${searchParams.toString()}`;
-
-    const res = await fetch(url);
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Ticketmaster error:", res.status, text);
+    const tmRes = await fetch(tmUrl.toString());
+    if (!tmRes.ok) {
+      const text = await tmRes.text();
+      console.error("Ticketmaster error:", tmRes.status, text);
       return {
-        statusCode: res.status,
-        body: JSON.stringify({ error: "Ticketmaster API error", details: text }),
+        statusCode: 502,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Ticketmaster API error" }),
       };
     }
 
-    const body = await res.json();
-    const tmEvents = body?._embedded?.events || [];
+    const tmData = await tmRes.json();
+    const rawEvents = tmData._embedded?.events || [];
 
-    const events = tmEvents.map((ev) => {
-      const venue =
-        ev._embedded && ev._embedded.venues && ev._embedded.venues[0]
-          ? ev._embedded.venues[0]
-          : null;
-
-      const image =
-        Array.isArray(ev.images) && ev.images.length ? ev.images[0].url : null;
-
-      const price =
-        Array.isArray(ev.priceRanges) && ev.priceRanges[0]
-          ? ev.priceRanges[0]
-          : null;
-
-      const dates = ev.dates && ev.dates.start;
-      const timeStart =
-        (dates && (dates.dateTime || dates.dateTBD || dates.localDate)) || null;
+    const events = rawEvents.map((ev) => {
+      const venue = ev._embedded?.venues?.[0] || {};
+      const images = ev.images || [];
+      const img = images.find((i) => i.url) || {};
+      const priceRanges = ev.priceRanges || [];
+      const pr = priceRanges[0] || {};
 
       return {
         id: ev.id,
         name: ev.name,
         description: ev.info || ev.pleaseNote || "",
-        time_start: timeStart,
-        url: ev.url,
-        image_url: image,
-        venue: venue
-          ? {
-              name: venue.name,
-              address1: venue.address && venue.address.line1,
-              city: venue.city && venue.city.name,
-              state: venue.state && venue.state.stateCode,
-              country: venue.country && venue.country.countryCode,
-            }
-          : null,
-        price_min: price ? price.min : null,
-        price_max: price ? price.max : null,
+        time_start: ev.dates?.start?.dateTime || null,
+        url: ev.url || null,
+        image_url: img.url || null,
+        venue: {
+          name: venue.name || "",
+          address1: venue.address?.line1 || "",
+          city: venue.city?.name || "",
+          state: venue.state?.stateCode || "",
+          country: venue.country?.countryCode || "",
+        },
+        price_min: pr.min ?? null,
+        price_max: pr.max ?? null,
       };
     });
 
     return {
       statusCode: 200,
       headers: {
+        ...CORS_HEADERS,
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({ events }),
     };
   } catch (err) {
-    console.error("Server error", err);
+    console.error("local-events error:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Server error", details: err.message }),
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: "Internal server error" }),
     };
   }
 };
