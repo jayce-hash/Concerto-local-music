@@ -1,7 +1,7 @@
 // main.js — Local Shows using Ticketmaster directly (no Netlify)
 
 // === CONFIG ===
-const TM_KEY = "oMkciJfNTvAuK1N4O1XXe49pdPEeJQuh";
+const TM_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB";
 const TM_ENDPOINT = "https://app.ticketmaster.com/discovery/v2/events.json";
 
 // DOM
