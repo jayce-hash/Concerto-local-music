@@ -60,6 +60,56 @@
         </div>
       </div>
 
+      <!-- More Filters toggle -->
+      <div class="more-filters-row">
+        <button type="button" id="toggleFilters" class="btn more-filters-btn">
+          <span class="filter-icon">☰</span>
+          <span>More Filters</span>
+          <span class="filter-caret">▾</span>
+        </button>
+      </div>
+
+      <!-- More Filters panel -->
+      <div id="moreFilters" class="more-filters-panel" hidden>
+        <!-- Genre -->
+        <div class="filter-group">
+          <h3 class="filter-title">Genre</h3>
+          <div class="radio-group" id="genreFilters">
+            <button type="button" class="pill" data-genre="pop">Pop</button>
+            <button type="button" class="pill" data-genre="rock">Rock</button>
+            <button type="button" class="pill" data-genre="hiphop">Rap / Hip-Hop</button>
+            <button type="button" class="pill" data-genre="rnb">R&amp;B / Soul</button>
+            <button type="button" class="pill" data-genre="country">Country</button>
+            <button type="button" class="pill" data-genre="edm">EDM / Electronic</button>
+            <button type="button" class="pill" data-genre="indie">Indie / Alt</button>
+            <button type="button" class="pill" data-genre="jazz">Jazz</button>
+            <button type="button" class="pill" data-genre="latin">Latin</button>
+          </div>
+        </div>
+
+        <!-- Time of Night -->
+        <div class="filter-group">
+          <h3 class="filter-title">Time of night</h3>
+          <div class="radio-group segmented" id="timeFilters">
+            <button type="button" class="pill active" data-time="any">Any time</button>
+            <button type="button" class="pill" data-time="afternoon">Afternoon (before 6pm)</button>
+            <button type="button" class="pill" data-time="evening">Evening (6–9pm)</button>
+            <button type="button" class="pill" data-time="latenight">Late night (after 9pm)</button>
+          </div>
+        </div>
+
+        <!-- Price -->
+        <div class="filter-group">
+          <h3 class="filter-title">Price</h3>
+          <div class="radio-group segmented" id="priceFilters">
+            <button type="button" class="pill active" data-price="any">Any price</button>
+            <button type="button" class="pill" data-price="free">Free</button>
+            <button type="button" class="pill" data-price="under20">Under $20</button>
+            <button type="button" class="pill" data-price="under50">Under $50</button>
+          </div>
+        </div>
+      </div>
+
       <div class="search-actions">
         <button type="button" id="searchBtn" class="btn-cta">
           Find Shows
@@ -83,7 +133,7 @@
     </section>
 
     <footer class="page-foot muted">
-      Event data provided by Ticketmaster.
+      Event data provided by Ticketmaster Discovery API.
     </footer>
   </div>
 
