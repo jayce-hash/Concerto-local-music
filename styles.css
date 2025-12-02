@@ -169,10 +169,13 @@ label {
 input[type="text"],
 input[type="date"] {
   width: 100%;
+  box-sizing: border-box;
   border-radius: 999px;
   border: 1px solid var(--line);
-  padding: 0.6rem 0.9rem;
-  font-size: 16px;                 /* stop iOS from auto-zooming, keep height consistent */
+  padding: 0.55rem 0.9rem;
+  font-size: 16px;          /* same font = same vertical rhythm */
+  min-height: 44px;         /* 👈 force same pill height */
+  line-height: 1.2;
   background: #fff;
   color: var(--ink);
   outline: none;
@@ -180,11 +183,20 @@ input[type="date"] {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* NEW: normalize iOS date control so it behaves like a normal pill */
+/* keep this from before */
 input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
   text-align: left;
+}
+
+/* optional iOS polish: normalize inner date text box */
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  padding: 0;
 }
 
 input::placeholder {
