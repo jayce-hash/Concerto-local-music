@@ -25,7 +25,8 @@ body {
 }
 
 body {
-  font-family: 'Lora', Georgia, serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   color: var(--ink);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
@@ -48,7 +49,7 @@ a:hover {
 }
 
 .page-header {
-  padding: 16px 0 8px;
+  padding: 12px 0 4px;          /* tighter + more app-like */
 }
 
 .page-header-inner {
@@ -60,33 +61,33 @@ a:hover {
 .page-main {
   width: min(640px, 92vw);
   margin: 0 auto;
-  padding-bottom: 24px;
+  padding-bottom: 16px;         /* slightly tighter bottom padding */
 }
 
 .page-footer {
   width: min(640px, 92vw);
-  margin: auto auto 12px;
+  margin: auto auto 8px;
   font-size: 0.85rem;
   text-align: center;
 }
 
 /* ===== Branding ===== */
 .brand-logo {
-  max-width: 260px;
-  width: 70%;
+  max-width: 240px;
+  width: 68%;
   height: auto;
   display: block;
-  margin: 0 auto 8px;
+  margin: 0 auto 6px;           /* smaller gap under logo */
 }
 
 /* Main feature title: EVENTS NEAR ME */
 .feature-title {
-  margin: 0 0 6px;
-  font-family: 'Lora', Georgia, serif;
+  margin: 0 0 4px;
+  font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   font-weight: 600;
-  font-size: 1.4rem; /* biggest text on the page */
+  font-size: 1.35rem;           /* big but not overpowering */
   color: var(--ink);
   text-align: center;
 }
@@ -94,7 +95,7 @@ a:hover {
 /* Subtitle under logo if used */
 .tagline {
   margin: 0;
-  font-family: 'Lora', Georgia, serif;
+  font-family: inherit;
   font-size: 0.9rem;
   color: var(--muted);
 }
@@ -104,11 +105,11 @@ a:hover {
 /* Section headings: Find Events, Results, etc. */
 .section-title {
   margin: 0 0 4px;
-  font-family: 'Lora', Georgia, serif;
+  font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--ink);
 }
 
@@ -121,10 +122,10 @@ a:hover {
 .status,
 .filters-panel,
 .suggest-item {
-  font-family: 'Lora', Georgia, serif;
+  font-family: inherit;
   font-size: 0.9rem;
   color: var(--muted);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .muted {
@@ -133,11 +134,11 @@ a:hover {
 
 /* Optional Results heading label */
 .results-header-label {
-  font-family: 'Lora', Georgia, serif;
+  font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--ink);
 }
 
@@ -158,11 +159,11 @@ a:hover {
   background: var(--card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
-  padding: 16px 16px 18px;
+  padding: 14px 14px 16px;      /* slightly denser */
 }
 
 .search-card {
-  margin-top: 16px;
+  margin-top: 12px;             /* closer to hero */
 }
 
 /* ===== Form ===== */
@@ -174,12 +175,12 @@ a:hover {
 
 /* Form labels: City & State, Date, etc. */
 label {
-  font-family: 'Lora', Georgia, serif;
+  font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.12em;
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 6px;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
   color: var(--ink);
 }
 
@@ -187,7 +188,7 @@ label {
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr; /* equal columns */
-  gap: 12px;
+  gap: 10px;
 }
 
 /* allow children to shrink evenly so the date control can't stretch the grid */
@@ -198,6 +199,7 @@ label {
 @media (max-width: 600px) {
   .form-grid {
     grid-template-columns: 1fr; /* stacked on phones */
+    gap: 8px;
   }
 }
 
@@ -208,9 +210,9 @@ input[type='date'] {
   box-sizing: border-box;
   border-radius: 999px;
   border: 1px solid var(--line);
-  padding: 0.55rem 0.9rem;
-  font-size: 16px; /* same font = same vertical rhythm + avoids iOS zoom */
-  min-height: 44px; /* force same pill height */
+  padding: 0.5rem 0.9rem;
+  font-size: 16px;              /* avoid iOS zoom */
+  min-height: 42px;             /* comfy tap, slightly slimmer */
   line-height: 1.2;
   background: #fff;
   color: var(--ink);
@@ -261,7 +263,7 @@ input:focus {
   top: 100%;
   margin-top: 4px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--line);
   box-shadow: var(--shadow-soft);
   max-height: 220px;
@@ -294,7 +296,7 @@ input:focus {
   padding: 6px 12px;
   border: 1px solid var(--line);
   background: #fff;
-  font-family: 'Lora', Georgia, serif;
+  font-family: inherit;
   font-size: 0.83rem;
   color: var(--ink);
   cursor: pointer;
@@ -315,7 +317,7 @@ input:focus {
 
 /* ===== More Filters Toggle ===== */
 .link-toggle {
-  margin: 0;
+  margin: 2px 0 0;
   padding: 0;
   border: none;
   background: none;
@@ -344,12 +346,12 @@ input:focus {
 
 /* ===== Filters Panel ===== */
 .filters-panel {
-  margin-top: 8px;
-  padding-top: 10px;
+  margin-top: 6px;
+  padding-top: 8px;
   border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   font-size: 0.86rem;
 }
 
@@ -360,15 +362,15 @@ input:focus {
 .filters-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Block titles inside More Filters */
 .filters-block-title {
-  font-family: 'Lora', Georgia, serif;
-  font-size: 0.82rem;
+  font-family: inherit;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   color: var(--muted);
   font-weight: 600;
 }
@@ -392,18 +394,18 @@ input:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.7rem 1.4rem;
+  padding: 0.65rem 1.35rem;
   border-radius: 999px;
   border: none;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  font-family: 'Lora', Georgia, serif;
+  font-family: inherit;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  font-size: 0.88rem;
   cursor: pointer;
-  box-shadow: 0 10px 20px rgba(18, 30, 54, 0.18);
+  box-shadow: 0 8px 18px rgba(18, 30, 54, 0.18);
   transition: transform 0.12s ease, box-shadow 0.16s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -411,12 +413,12 @@ input:focus {
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 26px rgba(18, 30, 54, 0.22);
+  box-shadow: 0 12px 24px rgba(18, 30, 54, 0.22);
 }
 
 .btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 8px 18px rgba(18, 30, 54, 0.16);
+  box-shadow: 0 6px 14px rgba(18, 30, 54, 0.16);
 }
 
 /* Search actions row */
@@ -424,8 +426,8 @@ input:focus {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-top: 4px;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .status {
@@ -434,14 +436,14 @@ input:focus {
 
 /* ===== Results ===== */
 .results {
-  margin-top: 18px;
+  margin-top: 14px;
 }
 
 .results-header {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 2px;
+  margin-bottom: 8px;
 }
 
 .results-summary {
@@ -451,7 +453,7 @@ input:focus {
 .events-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 /* Event card */
@@ -459,31 +461,31 @@ input:focus {
   background: #fff;
   border-radius: 14px;
   border: 1px solid var(--line);
-  padding: 12px 14px 12px;
-  box-shadow: 0 2px 8px rgba(18, 30, 54, 0.06);
+  padding: 10px 12px 11px;
+  box-shadow: 0 2px 6px rgba(18, 30, 54, 0.06);
 }
 
 /* Event title */
 .event-title {
-  margin: 0 0 4px;
-  font-family: 'Lora', Georgia, serif;
-  font-size: 1rem;
-  font-weight: 700;
+  margin: 0 0 3px;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 600;
   color: var(--ink);
 }
 
 .event-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.86rem;
+  gap: 6px;
+  font-size: 0.84rem;
   color: var(--muted);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .event-address {
-  font-size: 0.86rem;
-  margin-bottom: 6px;
+  font-size: 0.84rem;
+  margin-bottom: 5px;
 }
 
 .event-footer {
@@ -498,13 +500,13 @@ input:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.45rem 1.1rem;
+  padding: 0.42rem 1.05rem;
   border-radius: 999px;
   border: none;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  font-size: 0.86rem;
-  font-family: 'Lora', Georgia, serif;
+  font-size: 0.84rem;
+  font-family: inherit;
   text-decoration: none;
   box-shadow: 0 6px 14px rgba(18, 30, 54, 0.18);
   cursor: pointer;
@@ -515,7 +517,7 @@ input:focus {
 
 .event-ticket-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(18, 30, 54, 0.22);
+  box-shadow: 0 10px 20px rgba(18, 30, 54, 0.22);
 }
 
 .event-ticket-btn:active {
@@ -542,7 +544,7 @@ input:focus {
 /* ===== Mobile Tweaks ===== */
 @media (max-width: 600px) {
   .card {
-    padding: 14px 14px 16px;
+    padding: 12px 12px 14px;
   }
 
   .btn-primary {
@@ -555,6 +557,6 @@ input:focus {
 
   /* Make Tickets/Info easy to tap on phones */
   .event-ticket-btn {
-    min-width: 140px;
+    min-width: 130px;
   }
 }
