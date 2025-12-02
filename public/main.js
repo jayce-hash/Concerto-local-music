@@ -1,31 +1,48 @@
-// Because this app may run inside BuildFire or other frames,
-// we hardcode the Netlify domain for 100% reliability.
-const BASE_URL = "https://concerto-local-music.netlify.app";
+// main.js
 
 const eventsContainer = document.getElementById("events");
 const statusEl = document.getElementById("status");
+
+// Filters
 const filterButtons = document.querySelectorAll(".filter-btn");
 const dateInput = document.getElementById("date-picker");
 
-function setStatus(msg) {
-  if (statusEl) statusEl.textContent = msg;
-}
+// Location inputs
+const cityInput = document.getElementById("city-input");
+const stateSelect = document.getElementById("state-select");
+const applyLocationBtn = document.getElementById("apply-location");
 
-// Filters
+// 🔑 CHANGE THIS to your real Netlify domain
+// e.g. "https://concerto-local-events.netlify.app"
+const NETLIFY_BASE = "https://YOUR-SITE-NAME.netlify.app";
+
+// Keep track of current filter range
+let currentRange = "tonight";
+let currentDateStr = null;
+
+// ------------- EVENT LISTENERS -------------
+
 filterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     filterButtons.forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
 
     const range = btn.dataset.range;
+    currentRange = range;
+
     if (range === "date") {
+      dateInput.style.display = "block";
+
       if (dateInput.value) {
-        fetchAndRender("date", dateInput.value);
+        currentDateStr = dateInput.value;
+        fetchAndRender("date", currentDateStr);
       } else {
-        setStatus("Pick a date to see shows.");
+        statusEl.textContent = "Pick a date to see shows.";
         eventsContainer.innerHTML = "";
       }
     } else {
+      dateInput.style.display = "none";
+      currentDateStr = null;
       fetchAndRender(range);
     }
   });
@@ -33,12 +50,21 @@ filterButtons.forEach((btn) => {
 
 if (dateInput) {
   dateInput.addEventListener("change", () => {
-    const active = document.querySelector(".filter-btn.active");
-    if (active && active.dataset.range === "date") {
-      fetchAndRender("date", dateInput.value);
+    if (currentRange === "date" && dateInput.value) {
+      currentDateStr = dateInput.value;
+      fetchAndRender("date", currentDateStr);
     }
   });
 }
+
+if (applyLocationBtn) {
+  applyLocationBtn.addEventListener("click", () => {
+    // When user hits "Find Shows", re-run with the current filter
+    fetchAndRender(currentRange, currentDateStr);
+  });
+}
+
+// ------------- TIME RANGE -> UNIX SECONDS -------------
 
 function getUnixRange(range, dateStr) {
   const now = new Date();
@@ -46,19 +72,27 @@ function getUnixRange(range, dateStr) {
   const end = new Date();
 
   if (range === "tonight") {
+    // Tonight = now → 3am
     start.setTime(now.getTime());
     end.setDate(start.getDate() + 1);
     end.setHours(3, 0, 0, 0);
   } else if (range === "week") {
+    // Next 7 days
     start.setHours(0, 0, 0, 0);
     end.setDate(start.getDate() + 7);
     end.setHours(23, 59, 59, 999);
-  } else if (range === "date") {
-    const d = new Date(dateStr);
+  } else if (range === "date" && dateStr) {
+    // Specific calendar date (local)
+    const d = new Date(dateStr + "T00:00:00");
     start.setTime(d.getTime());
     start.setHours(0, 0, 0, 0);
     end.setTime(d.getTime());
     end.setHours(23, 59, 59, 999);
+  } else {
+    // Default = tonight
+    start.setTime(now.getTime());
+    end.setDate(start.getDate() + 1);
+    end.setHours(3, 0, 0, 0);
   }
 
   return {
@@ -67,103 +101,162 @@ function getUnixRange(range, dateStr) {
   };
 }
 
-function getCoordsFromUrl() {
-  const url = new URLSearchParams(window.location.search);
-  const lat = parseFloat(url.get("lat"));
-  const lng = parseFloat(url.get("lng"));
-  return !isNaN(lat) && !isNaN(lng) ? { lat, lng } : null;
-}
-
-async function getUserLocation() {
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      reject,
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
-  });
-}
+// ------------- MAIN FETCH -------------
 
 async function fetchAndRender(range = "tonight", dateStr = null) {
   try {
-    setStatus("Finding shows near you...");
-    eventsContainer.innerHTML = "";
+    const city = cityInput.value.trim();
+    const state = stateSelect.value.trim();
 
-    let coords = getCoordsFromUrl();
-    if (!coords) {
-      try {
-        coords = await getUserLocation();
-      } catch {
-        // fallback: downtown LA
-        coords = { lat: 34.0407, lng: -118.2468 };
-      }
+    if (!city || !state) {
+      statusEl.textContent =
+        "Select your city and state, then tap \"Find Shows\".";
+      eventsContainer.innerHTML = "";
+      return;
     }
+
+    statusEl.textContent = "Finding shows in your area...";
+    eventsContainer.innerHTML = "";
 
     const { start, end } = getUnixRange(range, dateStr);
 
     const params = new URLSearchParams({
-      lat: coords.lat,
-      lng: coords.lng,
-      radius: "20",
-      start_date: start,
-      end_date: end,
+      city,
+      state,
+      start_date: start.toString(),
+      end_date: end.toString(),
     });
 
-    const endpoint = `${BASE_URL}/.netlify/functions/local-events?${params.toString()}`;
-    console.log("Fetching:", endpoint);
+    const url = `${NETLIFY_BASE}/.netlify/functions/local-events?${params.toString()}`;
 
-    const res = await fetch(endpoint);
+    const res = await fetch(url);
     if (!res.ok) {
-      throw new Error("API error");
+      const text = await res.text();
+      console.error("Function error:", res.status, text);
+      throw new Error("API request failed");
     }
 
     const data = await res.json();
+    console.log("Events data:", data);
+
     const events = data.events || [];
 
     if (!events.length) {
-      setStatus("No local shows found.");
+      statusEl.textContent =
+        "No shows found for that city and date range. Try a different filter or date.";
       return;
     }
 
-    setStatus(`Showing ${events.length} performances.`);
+    statusEl.textContent = `Showing ${events.length} performances in ${city}, ${state}.`;
     renderEvents(events);
   } catch (err) {
-    console.error(err);
-    setStatus("We couldn’t load local shows. Check location settings.");
+    console.error("fetchAndRender error:", err);
+    statusEl.textContent =
+      "We couldn't load shows right now. Please try again in a moment.";
   }
 }
 
+// ------------- RENDER CARDS -------------
+
 function renderEvents(events) {
   eventsContainer.innerHTML = "";
-
-  events.forEach(ev => {
-    const venue = ev.venue || {};
-
-    const card = document.createElement("div");
+  events.forEach((ev) => {
+    const card = document.createElement("article");
     card.className = "event-card";
 
-    card.innerHTML = `
-      <img class="event-image" src="${ev.image_url || ""}" alt="" />
-      <div class="event-main">
-        <div class="event-name">${ev.name || "Live Music"}</div>
+    const img = document.createElement("img");
+    img.className = "event-image";
+    img.src = ev.image_url || "";
+    img.alt = ev.name || "Event image";
 
-        <div class="event-meta">
-          ${ev.time_start ? new Date(ev.time_start).toLocaleString() : "Time TBA"}
-          • ${venue.name || venue.address1 || venue.city || venue.state || "Location TBA"}
-        </div>
+    const main = document.createElement("div");
+    main.className = "event-main";
 
-        <div class="event-description">
-          ${ev.description || ""}
-        </div>
+    const nameEl = document.createElement("div");
+    nameEl.className = "event-name";
+    nameEl.textContent = ev.name || "Live Music";
 
-        <div class="event-actions">
-          ${ev.url ? `<a class="btn-outline" target="_blank" href="${ev.url}">View Event</a>` : ""}
-        </div>
-      </div>
-    `;
+    const metaEl = document.createElement("div");
+    metaEl.className = "event-meta";
 
+    const date = ev.time_start ? new Date(ev.time_start) : null;
+    const timeStr = date
+      ? date.toLocaleString(undefined, {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      : "Time TBA";
+
+    const venue = ev.venue || {};
+    const locStr =
+      venue.address1 ||
+      venue.city ||
+      venue.name
+        ? `${venue.name ? venue.name + " • " : ""}${venue.address1 || ""} ${
+            venue.city || ""
+          }, ${venue.state || ""}`.trim()
+        : "Location TBA";
+
+    metaEl.textContent = `${timeStr} • ${locStr}`;
+
+    const descEl = document.createElement("div");
+    descEl.className = "event-description";
+    descEl.textContent = ev.description || "";
+
+    const tagsEl = document.createElement("div");
+    tagsEl.className = "event-tags";
+
+    if (ev.price_min != null || ev.price_max != null) {
+      const pill = document.createElement("span");
+      pill.className = "tag-pill";
+      const min = ev.price_min != null ? `$${ev.price_min.toFixed(0)}` : "";
+      const max = ev.price_max != null ? `$${ev.price_max.toFixed(0)}` : "";
+      pill.textContent = max && max !== min ? `${min}–${max}` : min || "Paid";
+      tagsEl.appendChild(pill);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "event-actions";
+
+    if (ev.url) {
+      const btn = document.createElement("a");
+      btn.className = "btn-outline";
+      btn.href = ev.url;
+      btn.target = "_blank";
+      btn.rel = "noopener noreferrer";
+      btn.textContent = "View Event";
+      actions.appendChild(btn);
+    }
+
+    const planBtn = document.createElement("button");
+    planBtn.className = "btn-outline";
+    planBtn.textContent = "Plan Your Night";
+    planBtn.addEventListener("click", () => {
+      if (venue && (venue.address1 || venue.name || venue.city)) {
+        const q = encodeURIComponent(
+          `${venue.name || ""} ${venue.address1 || ""} ${venue.city || ""} ${
+            venue.state || ""
+          }`
+        );
+        window.open(`https://maps.apple.com/?q=${q}`, "_blank");
+      }
+    });
+    actions.appendChild(planBtn);
+
+    main.appendChild(nameEl);
+    main.appendChild(metaEl);
+    main.appendChild(descEl);
+    main.appendChild(tagsEl);
+    main.appendChild(actions);
+
+    card.appendChild(img);
+    card.appendChild(main);
     eventsContainer.appendChild(card);
   });
 }
 
-fetchAndRender("tonight");
+// NOTE: No default fetch on load.
+// User has to pick city/state and hit "Find Shows".
