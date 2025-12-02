@@ -788,6 +788,24 @@ function renderEvents(events) {
       </div>
     `;
 
+    // 🔹 Make Tickets / Info tap instantly in BuildFire WebView
+    if (url) {
+      const btn = card.querySelector(".event-ticket-btn");
+      if (btn) {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+
+          // If we're inside the BuildFire shell, use their navigation
+          if (window.buildfire && buildfire.navigation && buildfire.navigation.openWindow) {
+            buildfire.navigation.openWindow(url, "_blank");
+          } else {
+            // Fallback for normal browser usage
+            window.open(url, "_blank", "noopener");
+          }
+        });
+      }
+    }
+
     eventsContainer.appendChild(card);
   });
 }
