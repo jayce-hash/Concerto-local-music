@@ -439,14 +439,30 @@ select:focus {
   margin-top: 6px;
 }
 
-.ticket-link {
-  font-size: .9rem;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  color: var(--accent-2);
+/* Button-style Tickets / Info */
+.event-ticket-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: 0.9rem;
+  font-family: 'Lora', Georgia, serif;
+  text-decoration: none;
+  box-shadow: 0 8px 18px rgba(18,30,54,.14);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.16s ease;
 }
-.ticket-link:hover {
-  color: var(--accent);
+.event-ticket-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(18,30,54,.18);
+}
+.event-ticket-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(18,30,54,.12);
 }
 
 /* ===== Loading spinner ===== */
