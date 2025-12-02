@@ -542,6 +542,34 @@ async function fetchEvents(city, stateCode, category) {
   return data._embedded.events;
 }
 
+// ===== Dedupe events (fix duplicate results) =====
+function dedupeEvents(events) {
+  const seen = new Set();
+  const out = [];
+
+  for (const event of events) {
+    let key = event.id;
+    if (!key) {
+      const name = (event.name || "").trim();
+      const date = getEventLocalDate(event) || "";
+      let venueName = "";
+      const venue =
+        event._embedded &&
+        event._embedded.venues &&
+        event._embedded.venues[0];
+      if (venue && venue.name) venueName = venue.name.trim();
+      key = `${name}|${date}|${venueName}`;
+    }
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(event);
+    }
+  }
+
+  return out;
+}
+
 // ===== Advanced filters =====
 function matchesMusicGenre(event) {
   if (selectedMusicGenres.size === 0) return true;
@@ -749,7 +777,7 @@ function renderEvents(events) {
       <div class="event-footer">
         ${
           url && url !== "#"
-            ? `<a class="ticket-link" href="${url}" target="_blank" rel="noopener noreferrer">
+            ? `<a class="event-ticket-btn" href="${url}" target="_blank" rel="noopener noreferrer">
                  Tickets / Info
                </a>`
             : ""
@@ -785,7 +813,10 @@ async function handleSearch() {
   resultsSummary.textContent = "";
 
   try {
-    const events = await fetchEvents(city, stateCode, selectedCategory);
+    const rawEvents = await fetchEvents(city, stateCode, selectedCategory);
+
+    // De-duplicate before filtering
+    const events = dedupeEvents(rawEvents);
 
     if (!events.length) {
       statusEl.textContent = "No events found. Try another city.";
