@@ -1,5 +1,10 @@
-// main.js — Local Shows (via Netlify Function)
+// main.js — Local Shows using Ticketmaster directly (no Netlify)
 
+// === CONFIG ===
+const TM_KEY = "oMkciJfNTvAuK1N4O1XXe49pdPEeJQuh";
+const TM_ENDPOINT = "https://app.ticketmaster.com/discovery/v2/events.json";
+
+// DOM
 const eventsContainer = document.getElementById("events");
 const statusEl = document.getElementById("status");
 
@@ -12,55 +17,11 @@ const cityInput = document.getElementById("city-input");
 const stateSelect = document.getElementById("state-select");
 const applyLocationBtn = document.getElementById("apply-location");
 
-// Keep track of current filter range
+// State
 let currentRange = "tonight";
 let currentDateStr = null;
 
-// ------------- EVENT LISTENERS -------------
-
-filterButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    filterButtons.forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const range = btn.dataset.range;
-    currentRange = range;
-
-    if (range === "date") {
-      if (dateInput) dateInput.style.display = "block";
-
-      if (dateInput && dateInput.value) {
-        currentDateStr = dateInput.value;
-        fetchAndRender("date", currentDateStr);
-      } else {
-        statusEl.textContent = "Pick a date to see shows.";
-        eventsContainer.innerHTML = "";
-      }
-    } else {
-      if (dateInput) dateInput.style.display = "none";
-      currentDateStr = null;
-      fetchAndRender(range);
-    }
-  });
-});
-
-if (dateInput) {
-  dateInput.addEventListener("change", () => {
-    if (currentRange === "date" && dateInput.value) {
-      currentDateStr = dateInput.value;
-      fetchAndRender("date", currentDateStr);
-    }
-  });
-}
-
-if (applyLocationBtn) {
-  applyLocationBtn.addEventListener("click", () => {
-    fetchAndRender(currentRange, currentDateStr);
-  });
-}
-
-// ------------- TIME RANGE -> UNIX SECONDS -------------
-
+// ---- Helpers ----
 function getUnixRange(range, dateStr) {
   const now = new Date();
   const start = new Date();
@@ -92,8 +53,36 @@ function getUnixRange(range, dateStr) {
   };
 }
 
-// ------------- MAIN FETCH -------------
+function mapTicketmasterEvents(data) {
+  const rawEvents = data?._embedded?.events || [];
+  return rawEvents.map((ev) => {
+    const venue = ev._embedded?.venues?.[0] || {};
+    const images = ev.images || [];
+    const img = images.find((i) => i.url) || {};
+    const priceRanges = ev.priceRanges || [];
+    const pr = priceRanges[0] || {};
 
+    return {
+      id: ev.id,
+      name: ev.name,
+      description: ev.info || ev.pleaseNote || "",
+      time_start: ev.dates?.start?.dateTime || null,
+      url: ev.url || null,
+      image_url: img.url || null,
+      venue: {
+        name: venue.name || "",
+        address1: venue.address?.line1 || "",
+        city: venue.city?.name || "",
+        state: venue.state?.stateCode || "",
+        country: venue.country?.countryCode || "",
+      },
+      price_min: pr.min ?? null,
+      price_max: pr.max ?? null,
+    };
+  });
+}
+
+// ---- Fetch & render ----
 async function fetchAndRender(range = "tonight", dateStr = null) {
   try {
     const city = cityInput.value.trim();
@@ -106,37 +95,47 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
       return;
     }
 
+    if (!TM_KEY || TM_KEY === "YOUR_TICKETMASTER_API_KEY_HERE") {
+      statusEl.textContent =
+        "Ticketmaster key is missing. Add it in main.js and redeploy.";
+      eventsContainer.innerHTML = "";
+      return;
+    }
+
     statusEl.textContent = "Finding shows in your area...";
     eventsContainer.innerHTML = "";
 
     const { start, end } = getUnixRange(range, dateStr);
+    const startIso = new Date(start * 1000).toISOString();
+    const endIso = new Date(end * 1000).toISOString();
 
     const params = new URLSearchParams({
+      apikey: TM_KEY,
       city,
-      state,
-      start_date: start.toString(),
-      end_date: end.toString(),
+      stateCode: state,
+      countryCode: "US",
+      startDateTime: startIso,
+      endDateTime: endIso,
+      sort: "date,asc",
+      size: "100",
     });
 
-    const url = `/.netlify/functions/local-events?${params.toString()}`;
-    console.log("Calling function:", url);
+    const url = `${TM_ENDPOINT}?${params.toString()}`;
+    console.log("TM request:", url);
 
     const res = await fetch(url);
-    const text = await res.text(); // grab raw text in case of error
-    console.log("Function raw response:", text);
-
     if (!res.ok) {
-      let errMsg = `API error ${res.status}`;
-      try {
-        const parsed = JSON.parse(text);
-        if (parsed.error) errMsg += ` – ${parsed.error}`;
-      } catch {}
-      statusEl.textContent = errMsg;
-      return;
+      const text = await res.text();
+      console.error("Ticketmaster error:", res.status, text);
+      throw new Error(
+        `Ticketmaster error (${res.status}). Message: ${text.slice(0, 200)}`
+      );
     }
 
-    const data = JSON.parse(text);
-    const events = data.events || [];
+    const data = await res.json();
+    console.log("TM response:", data);
+
+    const events = mapTicketmasterEvents(data);
 
     if (!events.length) {
       statusEl.textContent =
@@ -148,13 +147,12 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
     renderEvents(events);
   } catch (err) {
     console.error("fetchAndRender error:", err);
-    const msg = err?.message || String(err || "Unknown error");
-    statusEl.textContent = `We couldn't load shows right now: ${msg}`;
+    statusEl.textContent =
+      "We couldn't load shows right now. Please try again in a moment.";
   }
 }
 
-// ------------- RENDER CARDS -------------
-
+// ---- Render cards ----
 function renderEvents(events) {
   eventsContainer.innerHTML = "";
   events.forEach((ev) => {
@@ -254,3 +252,47 @@ function renderEvents(events) {
     eventsContainer.appendChild(card);
   });
 }
+
+// ---- Event listeners ----
+filterButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    filterButtons.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const range = btn.dataset.range;
+    currentRange = range;
+
+    if (range === "date") {
+      if (dateInput) dateInput.style.display = "block";
+
+      if (dateInput && dateInput.value) {
+        currentDateStr = dateInput.value;
+        fetchAndRender("date", currentDateStr);
+      } else {
+        statusEl.textContent = "Pick a date to see shows.";
+        eventsContainer.innerHTML = "";
+      }
+    } else {
+      if (dateInput) dateInput.style.display = "none";
+      currentDateStr = null;
+      fetchAndRender(range);
+    }
+  });
+});
+
+if (dateInput) {
+  dateInput.addEventListener("change", () => {
+    if (currentRange === "date" && dateInput.value) {
+      currentDateStr = dateInput.value;
+      fetchAndRender("date", currentDateStr);
+    }
+  });
+}
+
+if (applyLocationBtn) {
+  applyLocationBtn.addEventListener("click", () => {
+    fetchAndRender(currentRange, currentDateStr);
+  });
+}
+
+// No auto-fetch on load — user chooses city/state and taps "Find Shows".
