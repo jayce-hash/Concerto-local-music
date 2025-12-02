@@ -44,7 +44,7 @@
           />
           <div id="locationSuggestions" class="suggest-list" hidden></div>
           <p class="tiny">
-            Powered by Ticketmaster. Pick a suggestion for best results.
+            Type a city and 2-letter state (e.g. Nashville, TN). Suggestions are just to help you format it.
           </p>
         </div>
 
@@ -84,10 +84,10 @@
 
       <!-- More Filters panel -->
       <div id="moreFilters" class="more-filters-panel" hidden>
-        <!-- Category-specific filters -->
         <!-- Live Music -->
         <div class="filter-group category-filters active" data-category="music">
           <h3 class="filter-title">Live music filters</h3>
+
           <div class="sub-label">Genre</div>
           <div class="radio-group" id="musicGenreFilters">
             <button type="button" class="pill" data-genre="pop">Pop</button>
@@ -100,15 +100,19 @@
             <button type="button" class="pill" data-genre="jazz">Jazz</button>
             <button type="button" class="pill" data-genre="latin">Latin</button>
           </div>
+
           <div class="sub-label">Venue size</div>
           <div class="radio-group" id="musicVenueFilters">
-            <button type="button" class="pill" data-small-venues="true">Small venues only (bars &amp; clubs)</button>
+            <button type="button" class="pill" data-small-venues="true">
+              Small venues only (bars &amp; clubs)
+            </button>
           </div>
         </div>
 
         <!-- Sports -->
         <div class="filter-group category-filters" data-category="sports">
           <h3 class="filter-title">Sports filters</h3>
+
           <div class="sub-label">Sport</div>
           <div class="radio-group" id="sportsTypeFilters">
             <button type="button" class="pill" data-sport="basketball">Basketball</button>
@@ -118,6 +122,7 @@
             <button type="button" class="pill" data-sport="soccer">Soccer</button>
             <button type="button" class="pill" data-sport="other">Other</button>
           </div>
+
           <div class="sub-label">Level</div>
           <div class="radio-group segmented" id="sportsLevelFilters">
             <button type="button" class="pill active" data-level="any">Any</button>
@@ -153,27 +158,6 @@
             <button type="button" class="pill" data-theater="musical">Musicals</button>
             <button type="button" class="pill" data-theater="play">Plays</button>
             <button type="button" class="pill" data-theater="family">Family-friendly</button>
-          </div>
-        </div>
-
-        <!-- Shared filters: time + price -->
-        <div class="filter-group">
-          <h3 class="filter-title">Time of night</h3>
-          <div class="radio-group segmented" id="timeFilters">
-            <button type="button" class="pill active" data-time="any">Any time</button>
-            <button type="button" class="pill" data-time="afternoon">Afternoon (before 6pm)</button>
-            <button type="button" class="pill" data-time="evening">Evening (6–9pm)</button>
-            <button type="button" class="pill" data-time="latenight">Late night (after 9pm)</button>
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <h3 class="filter-title">Price</h3>
-          <div class="radio-group segmented" id="priceFilters">
-            <button type="button" class="pill active" data-price="any">Any price</button>
-            <button type="button" class="pill" data-price="free">Free</button>
-            <button type="button" class="pill" data-price="under20">Under $20</button>
-            <button type="button" class="pill" data-price="under50">Under $50</button>
           </div>
         </div>
       </div>
