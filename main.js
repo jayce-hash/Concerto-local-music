@@ -1,4 +1,4 @@
-// main.js — Local Shows (direct Ticketmaster call, no Netlify functions)
+// main.js — Local Shows (direct Ticketmaster, with on-screen error details)
 
 // ----- DOM HOOKS -----
 const eventsContainer = document.getElementById("events");
@@ -13,7 +13,7 @@ const cityInput = document.getElementById("city-input");
 const stateSelect = document.getElementById("state-select");
 const applyLocationBtn = document.getElementById("apply-location");
 
-// ✅ Your Ticketmaster key (same as Concerto+)
+// ✅ Same Ticketmaster key you use in Concerto+
 const TM_API_KEY = "oMkciJfNTvAuK1N4O1XXe49pdPEeJQuh";
 
 // Keep track of current filter range
@@ -98,7 +98,6 @@ function getUnixRange(range, dateStr) {
   };
 }
 
-// Convert our unix range → ISO strings Ticketmaster expects
 function toIsoFromUnix(sec) {
   return new Date(sec * 1000).toISOString();
 }
@@ -140,6 +139,8 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
     tmUrl.searchParams.set("sort", "date,asc");
     tmUrl.searchParams.set("size", "100"); // up to 100 events
 
+    console.log("TM URL:", tmUrl.toString());
+
     const res = await fetch(tmUrl.toString());
 
     if (!res.ok) {
@@ -148,10 +149,10 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
 
       if (res.status === 401 || res.status === 403) {
         statusEl.textContent =
-          "Ticket search is blocked. Double-check your Ticketmaster API key.";
+          "Ticket search is blocked (401/403). Double-check your Ticketmaster API key & permissions.";
       } else {
         statusEl.textContent =
-          "We couldn't load shows right now. Please try again in a moment.";
+          `Ticketmaster error ${res.status}. Try again or adjust your search.`;
       }
       return;
     }
@@ -197,8 +198,9 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
     renderEvents(events);
   } catch (err) {
     console.error("fetchAndRender error:", err);
+    const msg = err && err.message ? err.message : String(err || "Unknown error");
     statusEl.textContent =
-      "We couldn't load shows right now. Please try again in a moment.";
+      `Error loading shows: ${msg}`;
   }
 }
 
