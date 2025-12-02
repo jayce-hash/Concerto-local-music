@@ -16,16 +16,44 @@ const resultsSummary = document.getElementById("resultsSummary");
 
 const toggleFiltersBtn = document.getElementById("toggleFilters");
 const moreFiltersEl = document.getElementById("moreFilters");
-const genreGroup = document.getElementById("genreFilters");
+const categoryFilters = document.getElementById("categoryFilters");
+
+// Filter DOM groups
+const musicGenreGroup = document.getElementById("musicGenreFilters");
+const musicVenueGroup = document.getElementById("musicVenueFilters");
+const sportsTypeGroup = document.getElementById("sportsTypeFilters");
+const sportsLevelGroup = document.getElementById("sportsLevelFilters");
+const comedyTypeGroup = document.getElementById("comedyTypeFilters");
+const festivalTypeGroup = document.getElementById("festivalTypeFilters");
+const theaterTypeGroup = document.getElementById("theaterTypeFilters");
 const timeGroup = document.getElementById("timeFilters");
 const priceGroup = document.getElementById("priceFilters");
 
-// Filter state
-const selectedGenres = new Set(); // multi-select
-let selectedTime = "any";         // "any" | "afternoon" | "evening" | "latenight"
-let selectedPrice = "any";        // "any" | "free" | "under20" | "under50"
+// State
+let selectedCategory = "music"; // "music" | "sports" | "comedy" | "festivals" | "theater"
 
-// Genre keyword mapping
+const selectedMusicGenres = new Set();
+let smallVenuesOnly = false;
+
+const selectedSports = new Set();
+let selectedSportsLevel = "any";
+
+const selectedComedyTypes = new Set();
+const selectedFestivalTypes = new Set();
+const selectedTheaterTypes = new Set();
+
+let selectedTime = "any";   // "any" | "afternoon" | "evening" | "latenight"
+let selectedPrice = "any";  // "any" | "free" | "under20" | "under50"
+
+const CATEGORY_LABELS = {
+  music: "live music",
+  sports: "sports",
+  comedy: "comedy",
+  festivals: "festivals",
+  theater: "theater",
+};
+
+// Keyword maps
 const GENRE_KEYWORDS = {
   pop: ["pop"],
   rock: ["rock"],
@@ -33,12 +61,43 @@ const GENRE_KEYWORDS = {
   rnb: ["r&b", "rnb", "soul"],
   country: ["country"],
   edm: ["edm", "electronic", "dance"],
-  indie: ["indie", "alternative", "alt rock", "alt-pop"],
+  indie: ["indie", "alternative", "alt rock", "alt-pop", "alt pop"],
   jazz: ["jazz"],
   latin: ["latin"],
 };
 
-// === Helpers ===
+const SPORT_KEYWORDS = {
+  basketball: ["basketball", "nba", "wnba", "ncaa", "march madness"],
+  football: ["football", "nfl", "cfb", "ncaa football"],
+  baseball: ["baseball", "mlb"],
+  hockey: ["hockey", "nhl"],
+  soccer: ["soccer", "mls", "premier league", "fc"],
+};
+
+const SPORTS_LEVEL_KEYWORDS = {
+  pro: ["nba", "nfl", "mlb", "nhl", "mls", "premier league", "fc"],
+  college: ["ncaa", "college", "university", "state university"],
+};
+
+const COMEDY_KEYWORDS = {
+  standup: ["stand-up", "stand up", "standup"],
+  improv: ["improv"],
+  club: ["comedy club", "improv theatre", "improv theater"],
+};
+
+const FESTIVAL_KEYWORDS = {
+  music: ["music festival", "fest", "music fest"],
+  food: ["food festival", "wine festival", "beer festival", "bbq", "bbq festival", "brew fest"],
+  cultural: ["fair", "carnival", "parade", "cultural festival"],
+};
+
+const THEATER_KEYWORDS = {
+  musical: ["musical"],
+  play: ["play", "drama"],
+  family: ["family", "kids", "children"],
+};
+
+// ===== Helpers =====
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
@@ -86,7 +145,7 @@ function getEventLocalTime(event) {
   return null;
 }
 
-// Small-venue heuristic
+// Small-venue heuristic (bars / clubs)
 function isSmallVenueEvent(event) {
   const venue =
     event._embedded &&
@@ -142,7 +201,56 @@ function debounce(fn, delay = 350) {
   };
 }
 
-// === Location suggestions (Ticketmaster venues) ===
+// Collect searchable text from event
+function getEventTextBlob(event) {
+  const chunks = [];
+  if (event.name) chunks.push(event.name);
+  if (event.info) chunks.push(event.info);
+  if (event.description) chunks.push(event.description);
+  if (event.pleaseNote) chunks.push(event.pleaseNote);
+  const joined = chunks.join(" | ");
+  return joined.toLowerCase();
+}
+
+// Event genres from classifications
+function getEventGenres(event) {
+  const out = [];
+  if (event.classifications && event.classifications.length) {
+    const c = event.classifications[0];
+    if (c.segment && c.segment.name) out.push(c.segment.name.toLowerCase());
+    if (c.genre && c.genre.name) out.push(c.genre.name.toLowerCase());
+    if (c.subGenre && c.subGenre.name) out.push(c.subGenre.name.toLowerCase());
+  }
+  return out;
+}
+
+// Event min price
+function getEventMinPrice(event) {
+  if (event.priceRanges && event.priceRanges.length) {
+    const p = event.priceRanges[0];
+    if (typeof p.min === "number") return p.min;
+  }
+  return null;
+}
+
+// ===== Category → Ticketmaster params =====
+function getCategoryParams(category) {
+  switch (category) {
+    case "sports":
+      return { segmentName: "Sports" };
+    case "comedy":
+      return { segmentName: "Arts & Theatre", keyword: "comedy" };
+    case "festivals":
+      return { keyword: "festival" };
+    case "theater":
+      return { segmentName: "Arts & Theatre" };
+    case "music":
+    default:
+      return { segmentName: "Music" };
+  }
+}
+
+// ===== Location suggestions (Ticketmaster venues) =====
 async function fetchLocationSuggestions(query) {
   const params = new URLSearchParams({
     apikey: API_KEY,
@@ -212,13 +320,11 @@ function renderLocationSuggestions(items) {
   locationSuggestions.hidden = false;
 }
 
-// Suggestion events
 locationSuggestions.addEventListener("click", (e) => {
   const target = e.target.closest(".suggest-item");
   if (!target) return;
   const value = target.getAttribute("data-value");
   if (!value) return;
-
   locationInput.value = value;
   locationSuggestions.hidden = true;
 });
@@ -250,7 +356,7 @@ const handleLocationInput = debounce(async () => {
 
 locationInput.addEventListener("input", handleLocationInput);
 
-// === More Filters toggle ===
+// ===== More Filters toggle =====
 toggleFiltersBtn.addEventListener("click", () => {
   const isOpen = !moreFiltersEl.hasAttribute("hidden");
   if (isOpen) {
@@ -262,27 +368,155 @@ toggleFiltersBtn.addEventListener("click", () => {
   }
 });
 
-// === Filter group interactions ===
+// ===== Category selection =====
+function updateCategoryFiltersVisibility() {
+  const groups = document.querySelectorAll(".category-filters");
+  groups.forEach((group) => {
+    const cat = group.dataset.category;
+    group.classList.toggle("active", cat === selectedCategory);
+  });
+}
 
-// Genre (multi-select)
-if (genreGroup) {
-  genreGroup.addEventListener("click", (e) => {
+categoryFilters.addEventListener("click", (e) => {
+  const pill = e.target.closest(".pill");
+  if (!pill) return;
+  const cat = pill.dataset.cat;
+  if (!cat) return;
+
+  selectedCategory = cat;
+
+  // update pill UI
+  Array.from(categoryFilters.querySelectorAll(".pill")).forEach((p) =>
+    p.classList.remove("active")
+  );
+  pill.classList.add("active");
+
+  // show correct filter block
+  updateCategoryFiltersVisibility();
+});
+
+// ===== Category-specific filter listeners =====
+
+// Live music: genres (multi-select)
+if (musicGenreGroup) {
+  musicGenreGroup.addEventListener("click", (e) => {
     const pill = e.target.closest(".pill");
     if (!pill) return;
     const val = pill.dataset.genre;
     if (!val) return;
 
-    if (selectedGenres.has(val)) {
-      selectedGenres.delete(val);
+    if (selectedMusicGenres.has(val)) {
+      selectedMusicGenres.delete(val);
       pill.classList.remove("active");
     } else {
-      selectedGenres.add(val);
+      selectedMusicGenres.add(val);
       pill.classList.add("active");
     }
   });
 }
 
-// Time of night (single-select)
+// Live music: small venues only (toggle)
+if (musicVenueGroup) {
+  musicVenueGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    if (!pill.dataset.smallVenues) return;
+
+    smallVenuesOnly = !smallVenuesOnly;
+    pill.classList.toggle("active", smallVenuesOnly);
+  });
+}
+
+// Sports: type (multi-select)
+if (sportsTypeGroup) {
+  sportsTypeGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.sport;
+    if (!val) return;
+
+    if (selectedSports.has(val)) {
+      selectedSports.delete(val);
+      pill.classList.remove("active");
+    } else {
+      selectedSports.add(val);
+      pill.classList.add("active");
+    }
+  });
+}
+
+// Sports: level (single-select)
+if (sportsLevelGroup) {
+  sportsLevelGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.level;
+    if (!val) return;
+
+    selectedSportsLevel = val;
+
+    Array.from(sportsLevelGroup.querySelectorAll(".pill")).forEach((p) =>
+      p.classList.remove("active")
+    );
+    pill.classList.add("active");
+  });
+}
+
+// Comedy: type (multi-select)
+if (comedyTypeGroup) {
+  comedyTypeGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.comedy;
+    if (!val) return;
+
+    if (selectedComedyTypes.has(val)) {
+      selectedComedyTypes.delete(val);
+      pill.classList.remove("active");
+    } else {
+      selectedComedyTypes.add(val);
+      pill.classList.add("active");
+    }
+  });
+}
+
+// Festivals: type (multi-select)
+if (festivalTypeGroup) {
+  festivalTypeGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.fest;
+    if (!val) return;
+
+    if (selectedFestivalTypes.has(val)) {
+      selectedFestivalTypes.delete(val);
+      pill.classList.remove("active");
+    } else {
+      selectedFestivalTypes.add(val);
+      pill.classList.add("active");
+    }
+  });
+}
+
+// Theater: type (multi-select)
+if (theaterTypeGroup) {
+  theaterTypeGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.theater;
+    if (!val) return;
+
+    if (selectedTheaterTypes.has(val)) {
+      selectedTheaterTypes.delete(val);
+      pill.classList.remove("active");
+    } else {
+      selectedTheaterTypes.add(val);
+      pill.classList.add("active");
+    }
+  });
+}
+
+// Time (single-select)
 if (timeGroup) {
   timeGroup.addEventListener("click", (e) => {
     const pill = e.target.closest(".pill");
@@ -291,7 +525,6 @@ if (timeGroup) {
     if (!val) return;
 
     selectedTime = val;
-
     Array.from(timeGroup.querySelectorAll(".pill")).forEach((p) =>
       p.classList.remove("active")
     );
@@ -308,7 +541,6 @@ if (priceGroup) {
     if (!val) return;
 
     selectedPrice = val;
-
     Array.from(priceGroup.querySelectorAll(".pill")).forEach((p) =>
       p.classList.remove("active")
     );
@@ -316,17 +548,18 @@ if (priceGroup) {
   });
 }
 
-// === Fetch events (no date params; date is filtered client-side) ===
-async function fetchEvents(city, stateCode) {
+// ===== Fetch events (no date params; date is filtered client-side) =====
+async function fetchEvents(city, stateCode, category) {
   const baseParams = {
     apikey: API_KEY,
     city,
     stateCode,
     countryCode: "US",
-    segmentName: "Music",
     size: "100",
     sort: "date,asc",
   };
+
+  Object.assign(baseParams, getCategoryParams(category));
 
   const params = new URLSearchParams(baseParams);
   const url = `${EVENTS_URL}?${params.toString()}`;
@@ -358,37 +591,104 @@ async function fetchEvents(city, stateCode) {
   return data._embedded.events;
 }
 
-// === Advanced filters (genre, time, price) ===
-function getEventGenres(event) {
-  const out = [];
-  if (event.classifications && event.classifications.length) {
-    const c = event.classifications[0];
-    if (c.segment && c.segment.name) out.push(c.segment.name.toLowerCase());
-    if (c.genre && c.genre.name) out.push(c.genre.name.toLowerCase());
-    if (c.subGenre && c.subGenre.name) out.push(c.subGenre.name.toLowerCase());
-  }
-  return out;
-}
-
-function matchesGenreFilter(event) {
-  if (selectedGenres.size === 0) return true; // no genre filter
-
+// ===== Advanced filters =====
+function matchesMusicGenre(event) {
+  if (selectedMusicGenres.size === 0) return true;
   const eventGenres = getEventGenres(event);
-  if (!eventGenres.length) return true; // don't hide if unknown
-
+  if (!eventGenres.length) return true;
   const lowered = eventGenres.join(" | ");
-
-  for (const value of selectedGenres) {
+  for (const value of selectedMusicGenres) {
     const keywords = GENRE_KEYWORDS[value] || [];
     for (const kw of keywords) {
-      if (lowered.includes(kw)) {
-        return true;
-      }
+      if (lowered.includes(kw)) return true;
     }
   }
   return false;
 }
 
+function matchesSportType(event) {
+  if (selectedSports.size === 0) return true;
+  const text = getEventTextBlob(event);
+
+  let matchesAnySelected = false;
+  let matchesAnyDefinedSport = false;
+
+  for (const [key, keywords] of Object.entries(SPORT_KEYWORDS)) {
+    const matchedThis = keywords.some((kw) => text.includes(kw));
+    if (matchedThis) {
+      matchesAnyDefinedSport = true;
+      if (selectedSports.has(key)) {
+        matchesAnySelected = true;
+      }
+    }
+  }
+
+  if (selectedSports.has("other")) {
+    if (!matchesAnyDefinedSport) return true;
+  }
+
+  return matchesAnySelected;
+}
+
+function matchesSportsLevel(event) {
+  if (selectedSportsLevel === "any") return true;
+  const text = getEventTextBlob(event);
+
+  if (selectedSportsLevel === "pro") {
+    return SPORTS_LEVEL_KEYWORDS.pro.some((kw) => text.includes(kw));
+  }
+  if (selectedSportsLevel === "college") {
+    return SPORTS_LEVEL_KEYWORDS.college.some((kw) => text.includes(kw));
+  }
+  return true;
+}
+
+function matchesComedyType(event) {
+  if (selectedComedyTypes.size === 0) return true;
+  const text = getEventTextBlob(event);
+
+  let matched = false;
+  for (const [key, arr] of Object.entries(COMEDY_KEYWORDS)) {
+    const any = arr.some((kw) => text.includes(kw));
+    if (any && selectedComedyTypes.has(key)) {
+      matched = true;
+      break;
+    }
+  }
+  return matched;
+}
+
+function matchesFestivalType(event) {
+  if (selectedFestivalTypes.size === 0) return true;
+  const text = getEventTextBlob(event);
+
+  let matched = false;
+  for (const [key, arr] of Object.entries(FESTIVAL_KEYWORDS)) {
+    const any = arr.some((kw) => text.includes(kw));
+    if (any && selectedFestivalTypes.has(key)) {
+      matched = true;
+      break;
+    }
+  }
+  return matched;
+}
+
+function matchesTheaterType(event) {
+  if (selectedTheaterTypes.size === 0) return true;
+  const text = getEventTextBlob(event);
+
+  let matched = false;
+  for (const [key, arr] of Object.entries(THEATER_KEYWORDS)) {
+    const any = arr.some((kw) => text.includes(kw));
+    if (any && selectedTheaterTypes.has(key)) {
+      matched = true;
+      break;
+    }
+  }
+  return matched;
+}
+
+// Time filter
 function matchesTimeFilter(event) {
   if (selectedTime === "any") return true;
 
@@ -397,61 +697,75 @@ function matchesTimeFilter(event) {
   const hour = parseInt(t.slice(0, 2), 10);
   if (Number.isNaN(hour)) return true;
 
-  if (selectedTime === "afternoon") {
-    return hour < 18;
-  }
-  if (selectedTime === "evening") {
-    return hour >= 18 && hour < 21;
-  }
-  if (selectedTime === "latenight") {
-    return hour >= 21;
-  }
-
+  if (selectedTime === "afternoon") return hour < 18;
+  if (selectedTime === "evening") return hour >= 18 && hour < 21;
+  if (selectedTime === "latenight") return hour >= 21;
   return true;
 }
 
-function getEventMinPrice(event) {
-  if (event.priceRanges && event.priceRanges.length) {
-    const p = event.priceRanges[0];
-    if (typeof p.min === "number") return p.min;
-  }
-  return null;
-}
-
+// Price filter
 function matchesPriceFilter(event) {
   if (selectedPrice === "any") return true;
-
   const min = getEventMinPrice(event);
-  if (min == null) return false; // no info, be conservative
+  if (min == null) return false;
 
-  if (selectedPrice === "free") {
-    return min === 0;
-  }
-  if (selectedPrice === "under20") {
-    return min > 0 && min <= 20;
-  }
-  if (selectedPrice === "under50") {
-    return min > 0 && min <= 50;
-  }
-
+  if (selectedPrice === "free") return min === 0;
+  if (selectedPrice === "under20") return min > 0 && min <= 20;
+  if (selectedPrice === "under50") return min > 0 && min <= 50;
   return true;
 }
 
-function applyAdvancedFilters(events) {
-  return events.filter((event) => {
-    if (!matchesGenreFilter(event)) return false;
-    if (!matchesTimeFilter(event)) return false;
-    if (!matchesPriceFilter(event)) return false;
-    return true;
-  });
+function applyGenericFilters(events) {
+  return events.filter(
+    (event) => matchesTimeFilter(event) && matchesPriceFilter(event)
+  );
 }
 
-// === Render events ===
+function applyMusicFilters(events) {
+  let out = events;
+  if (!events.length) return out;
+  out = out.filter(matchesMusicGenre);
+  if (smallVenuesOnly) {
+    out = out.filter(isSmallVenueEvent);
+  }
+  return out;
+}
+
+function applySportsFilters(events) {
+  let out = events;
+  if (!events.length) return out;
+  out = out.filter(matchesSportType);
+  out = out.filter(matchesSportsLevel);
+  return out;
+}
+
+function applyComedyFilters(events) {
+  let out = events;
+  if (!events.length) return out;
+  out = out.filter(matchesComedyType);
+  return out;
+}
+
+function applyFestivalFilters(events) {
+  let out = events;
+  if (!events.length) return out;
+  out = out.filter(matchesFestivalType);
+  return out;
+}
+
+function applyTheaterFilters(events) {
+  let out = events;
+  if (!events.length) return out;
+  out = out.filter(matchesTheaterType);
+  return out;
+}
+
+// ===== Render events =====
 function renderEvents(events) {
   eventsContainer.innerHTML = "";
 
   if (!events.length) {
-    eventsContainer.innerHTML = `<p class="muted">No small-venue music events found for this search.</p>`;
+    eventsContainer.innerHTML = `<p class="muted">No events matched your search.</p>`;
     return;
   }
 
@@ -500,9 +814,6 @@ function renderEvents(events) {
       .filter(Boolean)
       .join(" ");
 
-    const smallTag = isSmallVenueEvent(event);
-    const venueTagText = smallTag ? "Small venue" : "Venue";
-
     const card = document.createElement("article");
     card.className = "event-card";
 
@@ -518,7 +829,6 @@ function renderEvents(events) {
         ${escapeHtml(cityStateZip)}
       </div>
       <div class="event-footer">
-        <span class="venue-tag">${escapeHtml(venueTagText)}</span>
         ${
           url && url !== "#"
             ? `<a class="ticket-link" href="${url}" target="_blank" rel="noopener noreferrer">
@@ -533,7 +843,7 @@ function renderEvents(events) {
   });
 }
 
-// === Search handler ===
+// ===== Search handler =====
 async function handleSearch() {
   const rawLocation = locationInput.value.trim();
   const dateStr = dateInput.value || ""; // "YYYY-MM-DD" or ""
@@ -546,6 +856,7 @@ async function handleSearch() {
   }
 
   const { city, stateCode } = parsed;
+  const categoryLabel = CATEGORY_LABELS[selectedCategory] || "events";
 
   eventsContainer.innerHTML = "";
   statusEl.innerHTML = "";
@@ -556,19 +867,17 @@ async function handleSearch() {
   resultsSummary.textContent = "";
 
   try {
-    const events = await fetchEvents(city, stateCode);
+    const events = await fetchEvents(city, stateCode, selectedCategory);
 
     if (!events.length) {
       statusEl.textContent = "No events found. Try another city.";
-      resultsSummary.textContent = `No events for ${city}, ${stateCode}.`;
+      resultsSummary.textContent = `No ${categoryLabel} found for ${city}, ${stateCode}.`;
       renderEvents([]);
       return;
     }
 
-    // 1) Only small venues
-    let filtered = events.filter(isSmallVenueEvent);
-
-    // 2) Date filter (client-side)
+    // 1) Date filter (client-side)
+    let filtered = events;
     if (dateStr) {
       filtered = filtered.filter((event) => {
         const eventDate = getEventLocalDate(event);
@@ -576,32 +885,53 @@ async function handleSearch() {
       });
     }
 
-    // 3) Advanced filters (genre, time, price)
-    filtered = applyAdvancedFilters(filtered);
+    // 2) Generic filters (time + price)
+    filtered = applyGenericFilters(filtered);
+
+    // 3) Category-specific filters
+    switch (selectedCategory) {
+      case "music":
+        filtered = applyMusicFilters(filtered);
+        break;
+      case "sports":
+        filtered = applySportsFilters(filtered);
+        break;
+      case "comedy":
+        filtered = applyComedyFilters(filtered);
+        break;
+      case "festivals":
+        filtered = applyFestivalFilters(filtered);
+        break;
+      case "theater":
+        filtered = applyTheaterFilters(filtered);
+        break;
+      default:
+        break;
+    }
 
     if (!filtered.length) {
       if (dateStr) {
         statusEl.textContent =
-          "No shows match those filters on that date. Try adjusting filters or clearing the date.";
-        resultsSummary.textContent = `No small-venue shows for ${city}, ${stateCode} that match your filters on that date.`;
+          "No events match those filters on that date. Try adjusting your filters or clearing the date.";
+        resultsSummary.textContent = `No ${categoryLabel} in ${city}, ${stateCode} match your filters on that date.`;
       } else {
         statusEl.textContent =
-          "No shows match those filters. Try adjusting your filters.";
-        resultsSummary.textContent = `No small-venue shows for ${city}, ${stateCode} that match your filters.`;
+          "No events match those filters. Try adjusting your filters.";
+        resultsSummary.textContent = `No ${categoryLabel} in ${city}, ${stateCode} match your filters.`;
       }
       renderEvents([]);
       return;
     }
 
-    statusEl.textContent = `Found ${filtered.length} small-venue show(s).`;
-    resultsSummary.textContent = `Showing small-venue music events for ${city}, ${stateCode}${
+    statusEl.textContent = `Found ${filtered.length} ${categoryLabel} event(s).`;
+    resultsSummary.textContent = `Showing ${categoryLabel} for ${city}, ${stateCode}${
       dateStr ? " on your selected date" : ""
     } with your filters applied.`;
     renderEvents(filtered);
   } catch (err) {
-    console.error("🔥 Error loading shows:", err);
+    console.error("🔥 Error loading events:", err);
     statusEl.textContent =
-      err.message || "We couldn't load shows right now. Please try again in a moment.";
+      err.message || "We couldn't load events right now. Please try again in a moment.";
     resultsSummary.textContent = "Error loading events from Ticketmaster.";
   }
 }
@@ -621,3 +951,6 @@ dateInput.addEventListener("keydown", (e) => {
     handleSearch();
   }
 });
+
+// Init correct filters block
+updateCategoryFiltersVisibility();
