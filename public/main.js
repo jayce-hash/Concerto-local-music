@@ -17,7 +17,7 @@ const applyLocationBtn = document.getElementById("apply-location");
 // set this to "" and we’ll call the function via a relative path.
 // If you’re calling from BuildFire WebView or another domain, set this to
 // your full Netlify URL, e.g. "https://concerto-local-events.netlify.app"
-const NETLIFY_BASE = ""; // "" = same origin; or "https://YOUR-SITE.netlify.app"
+const NETLIFY_BASE = "https://concerto-local-music.netlify.app"; // "" = same origin; or "https://YOUR-SITE.netlify.app"
 
 // Keep track of current filter range
 let currentRange = "tonight";
