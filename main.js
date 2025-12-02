@@ -1,6 +1,6 @@
 // main.js
 
-const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- put your key here
+const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- put your real Ticketmaster key here
 
 const EVENTS_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
 const VENUES_URL = "https://app.ticketmaster.com/discovery/v2/venues.json";
@@ -26,8 +26,6 @@ const sportsLevelGroup = document.getElementById("sportsLevelFilters");
 const comedyTypeGroup = document.getElementById("comedyTypeFilters");
 const festivalTypeGroup = document.getElementById("festivalTypeFilters");
 const theaterTypeGroup = document.getElementById("theaterTypeFilters");
-const timeGroup = document.getElementById("timeFilters");
-const priceGroup = document.getElementById("priceFilters");
 
 // State
 let selectedCategory = "music"; // "music" | "sports" | "comedy" | "festivals" | "theater"
@@ -41,9 +39,6 @@ let selectedSportsLevel = "any";
 const selectedComedyTypes = new Set();
 const selectedFestivalTypes = new Set();
 const selectedTheaterTypes = new Set();
-
-let selectedTime = "any";   // "any" | "afternoon" | "evening" | "latenight"
-let selectedPrice = "any";  // "any" | "free" | "under20" | "under50"
 
 const CATEGORY_LABELS = {
   music: "live music",
@@ -224,15 +219,6 @@ function getEventGenres(event) {
   return out;
 }
 
-// Event min price
-function getEventMinPrice(event) {
-  if (event.priceRanges && event.priceRanges.length) {
-    const p = event.priceRanges[0];
-    if (typeof p.min === "number") return p.min;
-  }
-  return null;
-}
-
 // ===== Category → Ticketmaster params =====
 function getCategoryParams(category) {
   switch (category) {
@@ -250,7 +236,7 @@ function getCategoryParams(category) {
   }
 }
 
-// ===== Location suggestions (Ticketmaster venues) =====
+// ===== Location suggestions (Ticketmaster venues → city/state only) =====
 async function fetchLocationSuggestions(query) {
   const params = new URLSearchParams({
     apikey: API_KEY,
@@ -278,16 +264,12 @@ async function fetchLocationSuggestions(query) {
   for (const v of venues) {
     const city = v.city && v.city.name;
     const state = v.state && v.state.stateCode;
-    const name = v.name;
     if (!city || !state) continue;
 
-    const key = `${city}, ${state}`;
-    if (!set.has(key)) {
-      set.add(key);
-      suggestions.push({
-        label: key,
-        venueName: name || "",
-      });
+    const label = `${city}, ${state}`;
+    if (!set.has(label)) {
+      set.add(label);
+      suggestions.push({ label });
     }
     if (suggestions.length >= 10) break;
   }
@@ -306,12 +288,7 @@ function renderLocationSuggestions(items) {
     .map(
       (item) => `
       <div class="suggest-item" data-value="${escapeHtml(item.label)}">
-        <strong>${escapeHtml(item.label)}</strong>
-        ${
-          item.venueName
-            ? `<span>&mdash; ${escapeHtml(item.venueName)}</span>`
-            : ""
-        }
+        ${escapeHtml(item.label)}
       </div>
     `
     )
@@ -367,6 +344,12 @@ toggleFiltersBtn.addEventListener("click", () => {
     toggleFiltersBtn.classList.add("open");
   }
 });
+
+// Ensure More Filters starts closed on load
+if (moreFiltersEl) {
+  moreFiltersEl.setAttribute("hidden", "");
+  toggleFiltersBtn.classList.remove("open");
+}
 
 // ===== Category selection =====
 function updateCategoryFiltersVisibility() {
@@ -516,39 +499,7 @@ if (theaterTypeGroup) {
   });
 }
 
-// Time (single-select)
-if (timeGroup) {
-  timeGroup.addEventListener("click", (e) => {
-    const pill = e.target.closest(".pill");
-    if (!pill) return;
-    const val = pill.dataset.time;
-    if (!val) return;
-
-    selectedTime = val;
-    Array.from(timeGroup.querySelectorAll(".pill")).forEach((p) =>
-      p.classList.remove("active")
-    );
-    pill.classList.add("active");
-  });
-}
-
-// Price (single-select)
-if (priceGroup) {
-  priceGroup.addEventListener("click", (e) => {
-    const pill = e.target.closest(".pill");
-    if (!pill) return;
-    const val = pill.dataset.price;
-    if (!val) return;
-
-    selectedPrice = val;
-    Array.from(priceGroup.querySelectorAll(".pill")).forEach((p) =>
-      p.classList.remove("active")
-    );
-    pill.classList.add("active");
-  });
-}
-
-// ===== Fetch events (no date params; date is filtered client-side) =====
+// ===== Fetch events (no date in API call; date is filtered client-side) =====
 async function fetchEvents(city, stateCode, category) {
   const baseParams = {
     apikey: API_KEY,
@@ -686,39 +637,6 @@ function matchesTheaterType(event) {
     }
   }
   return matched;
-}
-
-// Time filter
-function matchesTimeFilter(event) {
-  if (selectedTime === "any") return true;
-
-  const t = getEventLocalTime(event);
-  if (!t) return true;
-  const hour = parseInt(t.slice(0, 2), 10);
-  if (Number.isNaN(hour)) return true;
-
-  if (selectedTime === "afternoon") return hour < 18;
-  if (selectedTime === "evening") return hour >= 18 && hour < 21;
-  if (selectedTime === "latenight") return hour >= 21;
-  return true;
-}
-
-// Price filter
-function matchesPriceFilter(event) {
-  if (selectedPrice === "any") return true;
-  const min = getEventMinPrice(event);
-  if (min == null) return false;
-
-  if (selectedPrice === "free") return min === 0;
-  if (selectedPrice === "under20") return min > 0 && min <= 20;
-  if (selectedPrice === "under50") return min > 0 && min <= 50;
-  return true;
-}
-
-function applyGenericFilters(events) {
-  return events.filter(
-    (event) => matchesTimeFilter(event) && matchesPriceFilter(event)
-  );
 }
 
 function applyMusicFilters(events) {
@@ -885,10 +803,7 @@ async function handleSearch() {
       });
     }
 
-    // 2) Generic filters (time + price)
-    filtered = applyGenericFilters(filtered);
-
-    // 3) Category-specific filters
+    // 2) Category-specific filters
     switch (selectedCategory) {
       case "music":
         filtered = applyMusicFilters(filtered);
