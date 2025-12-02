@@ -1,6 +1,5 @@
 // main.js
 
-// ---------- DOM HOOKS ----------
 const eventsContainer = document.getElementById("events");
 const statusEl = document.getElementById("status");
 
@@ -13,19 +12,12 @@ const cityInput = document.getElementById("city-input");
 const stateSelect = document.getElementById("state-select");
 const applyLocationBtn = document.getElementById("apply-location");
 
-// If this JS is running ON your Netlify site that also hosts the function,
-// set this to "" and we’ll call the function via a relative path.
-// If you’re calling from BuildFire WebView or another domain, set this to
-// your full Netlify URL, e.g. "https://concerto-local-events.netlify.app"
-const NETLIFY_BASE = "https://concerto-local-music.netlify.app"; // "" = same origin; or "https://YOUR-SITE.netlify.app"
-
 // Keep track of current filter range
 let currentRange = "tonight";
 let currentDateStr = null;
 
-// ---------- EVENT LISTENERS ----------
+// ------------- EVENT LISTENERS -------------
 
-// Filter buttons
 filterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     filterButtons.forEach((b) => b.classList.remove("active"));
@@ -35,28 +27,23 @@ filterButtons.forEach((btn) => {
     currentRange = range;
 
     if (range === "date") {
-      if (dateInput) {
-        dateInput.style.display = "block";
+      if (dateInput) dateInput.style.display = "block";
 
-        if (dateInput.value) {
-          currentDateStr = dateInput.value;
-          fetchAndRender("date", currentDateStr);
-        } else {
-          statusEl.textContent = "Pick a date to see shows.";
-          eventsContainer.innerHTML = "";
-        }
+      if (dateInput && dateInput.value) {
+        currentDateStr = dateInput.value;
+        fetchAndRender("date", currentDateStr);
+      } else {
+        statusEl.textContent = "Pick a date to see shows.";
+        eventsContainer.innerHTML = "";
       }
     } else {
-      if (dateInput) {
-        dateInput.style.display = "none";
-      }
+      if (dateInput) dateInput.style.display = "none";
       currentDateStr = null;
       fetchAndRender(range);
     }
   });
 });
 
-// When the user picks a date for "Select a Date"
 if (dateInput) {
   dateInput.addEventListener("change", () => {
     if (currentRange === "date" && dateInput.value) {
@@ -66,14 +53,14 @@ if (dateInput) {
   });
 }
 
-// When user hits "Find Shows"
 if (applyLocationBtn) {
   applyLocationBtn.addEventListener("click", () => {
+    // When user hits "Find Shows", re-run with the current filter
     fetchAndRender(currentRange, currentDateStr);
   });
 }
 
-// ---------- TIME RANGE → UNIX SECONDS ----------
+// ------------- TIME RANGE -> UNIX SECONDS -------------
 
 function getUnixRange(range, dateStr) {
   const now = new Date();
@@ -110,15 +97,10 @@ function getUnixRange(range, dateStr) {
   };
 }
 
-// ---------- MAIN FETCH ----------
+// ------------- MAIN FETCH -------------
 
 async function fetchAndRender(range = "tonight", dateStr = null) {
   try {
-    if (!cityInput || !stateSelect) {
-      console.error("City/state inputs missing in DOM");
-      return;
-    }
-
     const city = cityInput.value.trim();
     const state = stateSelect.value.trim();
 
@@ -141,11 +123,8 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
       end_date: end.toString(),
     });
 
-    const base = NETLIFY_BASE || ""; // "" if same origin
-    const url =
-      base === ""
-        ? `/.netlify/functions/local-events?${params.toString()}`
-        : `${base}/.netlify/functions/local-events?${params.toString()}`;
+    // 🔥 Relative path – no NETLIFY_BASE needed
+    const url = `/.netlify/functions/local-events?${params.toString()}`;
 
     const res = await fetch(url);
     if (!res.ok) {
@@ -174,16 +153,14 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
   }
 }
 
-// ---------- RENDER CARDS ----------
+// ------------- RENDER CARDS -------------
 
 function renderEvents(events) {
   eventsContainer.innerHTML = "";
-
   events.forEach((ev) => {
     const card = document.createElement("article");
     card.className = "event-card";
 
-    // Image
     const img = document.createElement("img");
     img.className = "event-image";
     img.src = ev.image_url || "";
@@ -192,12 +169,10 @@ function renderEvents(events) {
     const main = document.createElement("div");
     main.className = "event-main";
 
-    // Event Name
     const nameEl = document.createElement("div");
     nameEl.className = "event-name";
     nameEl.textContent = ev.name || "Live Music";
 
-    // Meta (date/time + venue line)
     const metaEl = document.createElement("div");
     metaEl.className = "event-meta";
 
@@ -214,7 +189,9 @@ function renderEvents(events) {
 
     const venue = ev.venue || {};
     const locStr =
-      venue.address1 || venue.city || venue.name
+      venue.address1 ||
+      venue.city ||
+      venue.name
         ? `${venue.name ? venue.name + " • " : ""}${venue.address1 || ""} ${
             venue.city || ""
           }, ${venue.state || ""}`.trim()
@@ -222,12 +199,10 @@ function renderEvents(events) {
 
     metaEl.textContent = `${timeStr} • ${locStr}`;
 
-    // Description
     const descEl = document.createElement("div");
     descEl.className = "event-description";
     descEl.textContent = ev.description || "";
 
-    // Price tags
     const tagsEl = document.createElement("div");
     tagsEl.className = "event-tags";
 
@@ -240,7 +215,6 @@ function renderEvents(events) {
       tagsEl.appendChild(pill);
     }
 
-    // Actions row
     const actions = document.createElement("div");
     actions.className = "event-actions";
 
@@ -269,7 +243,6 @@ function renderEvents(events) {
     });
     actions.appendChild(planBtn);
 
-    // Build card
     main.appendChild(nameEl);
     main.appendChild(metaEl);
     main.appendChild(descEl);
@@ -282,12 +255,5 @@ function renderEvents(events) {
   });
 }
 
-// ---------- INITIAL UI STATE ----------
-
-// Mark "Tonight" as the default active filter on load
-document.addEventListener("DOMContentLoaded", () => {
-  const tonightBtn = document.querySelector('.filter-btn[data-range="tonight"]');
-  if (tonightBtn) tonightBtn.classList.add("active");
-  if (dateInput) dateInput.style.display = "none"; // hide date picker until "Select a Date"
-  // No auto-fetch; user must choose city/state and tap "Find Shows"
-});
+// NOTE: No default fetch on load.
+// User has to pick city/state and hit "Find Shows".
