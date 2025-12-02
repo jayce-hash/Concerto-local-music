@@ -777,29 +777,24 @@ function renderEvents(events) {
       <div class="event-footer">
         ${
           url
-            ? `<a class="event-ticket-btn"
-                  href="${url}"
-                  target="_blank"
-                  rel="noopener noreferrer">
+            ? `<button class="event-ticket-btn" type="button">
                  Tickets / Info
-               </a>`
+               </button>`
             : ""
         }
       </div>
     `;
 
-    // 🔹 Make Tickets / Info tap instantly in BuildFire WebView
+    // 🔹 Make Tickets / Info respond to a normal tap in BuildFire WebView
     if (url) {
       const btn = card.querySelector(".event-ticket-btn");
       if (btn) {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-
-          // If we're inside the BuildFire shell, use their navigation
+        btn.addEventListener("click", () => {
           if (window.buildfire && buildfire.navigation && buildfire.navigation.openWindow) {
+            // Inside BuildFire
             buildfire.navigation.openWindow(url, "_blank");
           } else {
-            // Fallback for normal browser usage
+            // Normal browser fallback
             window.open(url, "_blank", "noopener");
           }
         });
