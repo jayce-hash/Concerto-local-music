@@ -167,7 +167,7 @@ input[type="date"] {
   border-radius: 999px;
   border: 1px solid var(--line);
   padding: 0.6rem 0.9rem;
-  font-size: 0.9rem;
+  font-size: 16px;                 /* 👈 stop iOS from auto-zooming */
   background: #fff;
   color: var(--ink);
   outline: none;
