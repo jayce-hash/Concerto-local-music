@@ -263,6 +263,97 @@ select:focus {
   font-size: .9rem;
 }
 
+/* ===== More Filters ===== */
+.more-filters-row {
+  margin-top: var(--s-3);
+}
+
+.more-filters-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  border-radius: 999px;
+  border-color: var(--line);
+  background: #fff;
+  padding-inline: 1.1rem;
+}
+
+.filter-icon {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+.filter-caret {
+  margin-left: .25rem;
+  transition: transform .16s ease;
+  font-size: 0.75rem;
+}
+.more-filters-btn.open .filter-caret {
+  transform: rotate(180deg);
+}
+
+.more-filters-panel {
+  margin-top: var(--s-3);
+  padding: var(--s-3);
+  border-radius: var(--r-16);
+  border: 1px solid var(--line-soft);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.filter-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 400;
+  font-size: .9rem;
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Pills */
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .4ch;
+  padding: .5rem .9rem;
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid #E1E7F0;
+  background: linear-gradient(180deg,#FFF,#F6F8FB);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .14s, box-shadow .18s, background .18s, transform .12s;
+  font-size: .88rem;
+  user-select: none;
+}
+.pill:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.pill.active {
+  background:#E6EBF3;
+  border-color:#C0CCE0;
+  box-shadow:0 1px 0 rgba(0,0,0,.02), inset 0 0 0 1px rgba(42,58,99,.04);
+}
+
+.radio-group.segmented .pill {
+  border-radius: 10px;
+}
+
 /* ===== Results ===== */
 .results-section {
   margin-top: var(--s-4);
@@ -353,7 +444,7 @@ select:focus {
   color: var(--accent);
 }
 
-/* ===== Loading spinner (optional) ===== */
+/* ===== Loading spinner ===== */
 .spinner {
   width: 28px;
   height: 28px;
