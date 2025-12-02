@@ -25,8 +25,9 @@ body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
   color: var(--ink);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
@@ -49,7 +50,7 @@ a:hover {
 }
 
 .page-header {
-  padding: 12px 0 4px;          /* tighter + more app-like */
+  padding: 12px 0 4px;
 }
 
 .page-header-inner {
@@ -61,7 +62,7 @@ a:hover {
 .page-main {
   width: min(640px, 92vw);
   margin: 0 auto;
-  padding-bottom: 16px;         /* slightly tighter bottom padding */
+  padding-bottom: 16px;
 }
 
 .page-footer {
@@ -77,7 +78,7 @@ a:hover {
   width: 68%;
   height: auto;
   display: block;
-  margin: 0 auto 6px;           /* smaller gap under logo */
+  margin: 0 auto 6px;
 }
 
 /* Main feature title: EVENTS NEAR ME */
@@ -85,18 +86,18 @@ a:hover {
   margin: 0 0 4px;
   font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   font-weight: 600;
-  font-size: 1.35rem;           /* big but not overpowering */
+  font-size: 1.32rem;
   color: var(--ink);
   text-align: center;
 }
 
-/* Subtitle under logo if used */
+/* Subtitle under logo */
 .tagline {
   margin: 0;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   color: var(--muted);
 }
 
@@ -104,12 +105,12 @@ a:hover {
 
 /* Section headings: Find Events, Results, etc. */
 .section-title {
-  margin: 0 0 4px;
+  margin: 0 0 3px;
   font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: var(--ink);
 }
 
@@ -123,7 +124,7 @@ a:hover {
 .filters-panel,
 .suggest-item {
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--muted);
   line-height: 1.4;
 }
@@ -136,9 +137,9 @@ a:hover {
 .results-header-label {
   font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: var(--ink);
 }
 
@@ -159,11 +160,11 @@ a:hover {
   background: var(--card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
-  padding: 14px 14px 16px;      /* slightly denser */
+  padding: 12px 12px 14px;
 }
 
 .search-card {
-  margin-top: 12px;             /* closer to hero */
+  margin-top: 10px;
 }
 
 /* ===== Form ===== */
@@ -171,24 +172,33 @@ a:hover {
 .field {
   display: flex;
   flex-direction: column;
+  gap: 4px;                 /* normalize label → control spacing */
 }
 
 /* Form labels: City & State, Date, etc. */
 label {
   font-family: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   font-weight: 600;
-  font-size: 0.88rem;
-  margin-bottom: 4px;
+  font-size: 0.84rem;
+  margin: 0;
   color: var(--ink);
+}
+
+/* top of form: Find Events, help text, then first field */
+.search-card .section-title {
+  margin-bottom: 2px;
+}
+.search-card .section-help {
+  margin-bottom: 6px;
 }
 
 /* Make City and Date pills same width */
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* equal columns */
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 /* allow children to shrink evenly so the date control can't stretch the grid */
@@ -204,15 +214,15 @@ label {
 }
 
 /* Text + Date inputs styled as pills */
-input[type='text'],
-input[type='date'] {
+input[type="text"],
+input[type="date"] {
   width: 100%;
   box-sizing: border-box;
   border-radius: 999px;
   border: 1px solid var(--line);
-  padding: 0.5rem 0.9rem;
-  font-size: 16px;              /* avoid iOS zoom */
-  min-height: 42px;             /* comfy tap, slightly slimmer */
+  padding: 0.45rem 0.85rem;
+  font-size: 15px;              /* slightly smaller, less chunky */
+  min-height: 40px;
   line-height: 1.2;
   background: #fff;
   color: var(--ink);
@@ -222,23 +232,25 @@ input[type='date'] {
 }
 
 /* normalize date field */
-input[type='date'] {
+input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
   text-align: left;
 }
 
-/* optional iOS polish: normalize inner date text box */
-input[type='date']::-webkit-datetime-edit,
-input[type='date']::-webkit-datetime-edit-text,
-input[type='date']::-webkit-datetime-edit-month-field,
-input[type='date']::-webkit-datetime-edit-day-field,
-input[type='date']::-webkit-datetime-edit-year-field {
+/* iOS inner date text box */
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
   padding: 0;
 }
 
+/* smaller placeholder inside City & State pill */
 input::placeholder {
   color: #9aa3b5;
+  font-size: 0.85rem;          /* 👈 smaller "eg Chicago, IL" text */
 }
 
 input:focus {
@@ -247,7 +259,7 @@ input:focus {
 }
 
 .tiny {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   font-size: 0.78rem;
 }
 
@@ -277,7 +289,6 @@ input:focus {
 
 .suggest-item {
   padding: 8px 10px;
-  font-size: 0.9rem;
   cursor: pointer;
 }
 .suggest-item:hover {
@@ -288,16 +299,17 @@ input:focus {
 .pill-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 4px;           /* consistent spacing after "What are you looking for?" */
 }
 
 .pill {
   border-radius: 999px;
-  padding: 6px 12px;
+  padding: 5px 11px;
   border: 1px solid var(--line);
   background: #fff;
   font-family: inherit;
-  font-size: 0.83rem;
+  font-size: 0.8rem;
   color: var(--ink);
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease,
@@ -322,7 +334,7 @@ input:focus {
   border: none;
   background: none;
   color: var(--accent-2);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -330,7 +342,7 @@ input:focus {
 }
 
 .filter-icon {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   opacity: 0.75;
 }
 
@@ -351,8 +363,8 @@ input:focus {
   border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  font-size: 0.86rem;
+  gap: 8px;
+  font-size: 0.84rem;
 }
 
 .filters-panel[hidden] {
@@ -362,21 +374,21 @@ input:focus {
 .filters-block {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* Block titles inside More Filters */
 .filters-block-title {
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: var(--muted);
   font-weight: 600;
 }
 
 .sub-label {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: var(--ink);
 }
@@ -394,7 +406,7 @@ input:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.65rem 1.35rem;
+  padding: 0.6rem 1.3rem;
   border-radius: 999px;
   border: none;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -402,13 +414,22 @@ input:focus {
   font-family: inherit;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.88rem;
+  letter-spacing: 0.14em;
+  font-size: 0.82rem;
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(18, 30, 54, 0.18);
   transition: transform 0.12s ease, box-shadow 0.16s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+/* Search actions row (Find Events button + status) */
+.search-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;          /* consistent spacing after pills / filters */
 }
 
 .btn-primary:hover {
@@ -421,17 +442,8 @@ input:focus {
   box-shadow: 0 6px 14px rgba(18, 30, 54, 0.16);
 }
 
-/* Search actions row */
-.search-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-}
-
 .status {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
 /* ===== Results ===== */
@@ -469,7 +481,7 @@ input:focus {
 .event-title {
   margin: 0 0 3px;
   font-family: inherit;
-  font-size: 0.98rem;
+  font-size: 0.96rem;
   font-weight: 600;
   color: var(--ink);
 }
@@ -478,13 +490,13 @@ input:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   color: var(--muted);
   margin-bottom: 3px;
 }
 
 .event-address {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   margin-bottom: 5px;
 }
 
@@ -500,12 +512,12 @@ input:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.42rem 1.05rem;
+  padding: 0.4rem 1.0rem;
   border-radius: 999px;
   border: none;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-family: inherit;
   text-decoration: none;
   box-shadow: 0 6px 14px rgba(18, 30, 54, 0.18);
