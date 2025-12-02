@@ -16,175 +16,181 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="container narrow">
-    <header class="page-head">
-      <h1>Events Near Me</h1>
-      <p class="muted">
-        Search concerts, sports, comedy, festivals, theater and more in any city. Pick your date, choose your vibe, and go.
-      </p>
+  <div class="page">
+    <header class="page-header">
+      <div class="page-header-inner">
+        <h1 class="app-mark">Events Near Me</h1>
+        <p class="tagline">
+          Quickly see concerts, sports, comedy, festivals, and theater in any city.
+        </p>
+      </div>
     </header>
 
-    <!-- Search Card -->
-    <section class="card search-card">
-      <h2 class="step-title">Find events</h2>
-      <p class="step-help">
-        Start with your city and date, then choose what you’re looking for. We’ll pull live events from Ticketmaster.
-      </p>
-
-      <!-- City / State + Date -->
-      <div class="form-grid two">
-        <!-- City + State with suggestions -->
-        <div class="field suggest full">
-          <label for="locationInput">City &amp; State</label>
-          <input
-            type="text"
-            id="locationInput"
-            placeholder="Start typing a city, e.g. Austin, TX"
-            autocomplete="off"
-          />
-          <div id="locationSuggestions" class="suggest-list" hidden></div>
-          <p class="tiny">
-            Type a city and 2-letter state (e.g. Nashville, TN). Suggestions are just to help you format it.
-          </p>
-        </div>
-
-        <!-- Date -->
-        <div class="field">
-          <label for="dateInput">Date</label>
-          <input
-            type="date"
-            id="dateInput"
-          />
-          <p class="tiny">
-            Leave empty to see upcoming events; choose a date to narrow it down.
-          </p>
-        </div>
-      </div>
-
-      <!-- Category selection -->
-      <div class="field category-field">
-        <label>What are you looking for?</label>
-        <div class="radio-group segmented" id="categoryFilters">
-          <button type="button" class="pill active" data-cat="music">Live Music</button>
-          <button type="button" class="pill" data-cat="sports">Sports</button>
-          <button type="button" class="pill" data-cat="comedy">Comedy</button>
-          <button type="button" class="pill" data-cat="festivals">Festivals</button>
-          <button type="button" class="pill" data-cat="theater">Theater</button>
-        </div>
-      </div>
-
-      <!-- More Filters toggle -->
-      <div class="more-filters-row">
-        <button type="button" id="toggleFilters" class="btn more-filters-btn">
-          <span class="filter-icon">☰</span>
-          <span>More Filters</span>
-          <span class="filter-caret">▾</span>
-        </button>
-      </div>
-
-      <!-- More Filters panel -->
-      <div id="moreFilters" class="more-filters-panel" hidden>
-        <!-- Live Music -->
-        <div class="filter-group category-filters active" data-category="music">
-          <h3 class="filter-title">Live music filters</h3>
-
-          <div class="sub-label">Genre</div>
-          <div class="radio-group" id="musicGenreFilters">
-            <button type="button" class="pill" data-genre="pop">Pop</button>
-            <button type="button" class="pill" data-genre="rock">Rock</button>
-            <button type="button" class="pill" data-genre="hiphop">Rap / Hip-Hop</button>
-            <button type="button" class="pill" data-genre="rnb">R&amp;B / Soul</button>
-            <button type="button" class="pill" data-genre="country">Country</button>
-            <button type="button" class="pill" data-genre="edm">EDM / Electronic</button>
-            <button type="button" class="pill" data-genre="indie">Indie / Alt</button>
-            <button type="button" class="pill" data-genre="jazz">Jazz</button>
-            <button type="button" class="pill" data-genre="latin">Latin</button>
+    <main class="page-main">
+      <!-- Search Card -->
+      <section class="card search-card">
+        <!-- Core search -->
+        <div class="stack gap-16">
+          <div class="stack gap-6">
+            <h2 class="section-title">Find events</h2>
+            <p class="section-help">
+              Start with your city and date, then pick what you’re in the mood for.
+            </p>
           </div>
 
-          <div class="sub-label">Venue size</div>
-          <div class="radio-group" id="musicVenueFilters">
-            <button type="button" class="pill" data-small-venues="true">
-              Small venues only (bars &amp; clubs)
+          <!-- City & State + Date -->
+          <div class="form-grid">
+            <!-- City + State with suggestions -->
+            <div class="field suggest">
+              <label for="locationInput">City &amp; State</label>
+              <input
+                type="text"
+                id="locationInput"
+                placeholder="e.g. Nashville, TN"
+                autocomplete="off"
+              />
+              <div id="locationSuggestions" class="suggest-list" hidden></div>
+            </div>
+
+            <!-- Date -->
+            <div class="field">
+              <label for="dateInput">Date</label>
+              <input
+                type="date"
+                id="dateInput"
+              />
+              <p class="tiny">
+                Leave blank to see upcoming events.
+              </p>
+            </div>
+          </div>
+
+          <!-- Category pills -->
+          <div class="field">
+            <label>What are you looking for?</label>
+            <div class="pill-row" id="categoryFilters">
+              <button type="button" class="pill active" data-cat="music">Live Music</button>
+              <button type="button" class="pill" data-cat="sports">Sports</button>
+              <button type="button" class="pill" data-cat="comedy">Comedy</button>
+              <button type="button" class="pill" data-cat="festivals">Festivals</button>
+              <button type="button" class="pill" data-cat="theater">Theater</button>
+            </div>
+          </div>
+
+          <!-- More filters toggle -->
+          <button type="button" id="toggleFilters" class="link-toggle">
+            <span class="filter-icon">☰</span>
+            <span>More filters</span>
+            <span class="filter-caret">▾</span>
+          </button>
+
+          <!-- More Filters Panel -->
+          <div id="moreFilters" class="filters-panel" hidden>
+            <!-- Live Music -->
+            <div class="filters-block category-filters active" data-category="music">
+              <div class="filters-block-title">Live music filters</div>
+
+              <div class="sub-label">Genre</div>
+              <div class="pill-row" id="musicGenreFilters">
+                <button type="button" class="pill" data-genre="pop">Pop</button>
+                <button type="button" class="pill" data-genre="rock">Rock</button>
+                <button type="button" class="pill" data-genre="hiphop">Rap / Hip-Hop</button>
+                <button type="button" class="pill" data-genre="rnb">R&amp;B / Soul</button>
+                <button type="button" class="pill" data-genre="country">Country</button>
+                <button type="button" class="pill" data-genre="edm">EDM / Electronic</button>
+                <button type="button" class="pill" data-genre="indie">Indie / Alt</button>
+                <button type="button" class="pill" data-genre="jazz">Jazz</button>
+                <button type="button" class="pill" data-genre="latin">Latin</button>
+              </div>
+
+              <div class="sub-label">Venue type</div>
+              <div class="pill-row" id="musicVenueFilters">
+                <button type="button" class="pill" data-small-venues="true">
+                  Small venues only (bars &amp; clubs)
+                </button>
+              </div>
+            </div>
+
+            <!-- Sports -->
+            <div class="filters-block category-filters" data-category="sports">
+              <div class="filters-block-title">Sports filters</div>
+
+              <div class="sub-label">Sport</div>
+              <div class="pill-row" id="sportsTypeFilters">
+                <button type="button" class="pill" data-sport="basketball">Basketball</button>
+                <button type="button" class="pill" data-sport="football">Football</button>
+                <button type="button" class="pill" data-sport="baseball">Baseball</button>
+                <button type="button" class="pill" data-sport="hockey">Hockey</button>
+                <button type="button" class="pill" data-sport="soccer">Soccer</button>
+                <button type="button" class="pill" data-sport="other">Other</button>
+              </div>
+
+              <div class="sub-label">Level</div>
+              <div class="pill-row" id="sportsLevelFilters">
+                <button type="button" class="pill active" data-level="any">Any</button>
+                <button type="button" class="pill" data-level="pro">Pro</button>
+                <button type="button" class="pill" data-level="college">College</button>
+              </div>
+            </div>
+
+            <!-- Comedy -->
+            <div class="filters-block category-filters" data-category="comedy">
+              <div class="filters-block-title">Comedy filters</div>
+              <div class="sub-label">Type</div>
+              <div class="pill-row" id="comedyTypeFilters">
+                <button type="button" class="pill" data-comedy="standup">Stand-up</button>
+                <button type="button" class="pill" data-comedy="improv">Improv</button>
+                <button type="button" class="pill" data-comedy="club">Comedy club</button>
+              </div>
+            </div>
+
+            <!-- Festivals -->
+            <div class="filters-block category-filters" data-category="festivals">
+              <div class="filters-block-title">Festival filters</div>
+              <div class="sub-label">Type</div>
+              <div class="pill-row" id="festivalTypeFilters">
+                <button type="button" class="pill" data-fest="music">Music festivals</button>
+                <button type="button" class="pill" data-fest="food">Food &amp; drink</button>
+                <button type="button" class="pill" data-fest="cultural">Fairs &amp; cultural</button>
+              </div>
+            </div>
+
+            <!-- Theater -->
+            <div class="filters-block category-filters" data-category="theater">
+              <div class="filters-block-title">Theater filters</div>
+              <div class="sub-label">Type</div>
+              <div class="pill-row" id="theaterTypeFilters">
+                <button type="button" class="pill" data-theater="musical">Musicals</button>
+                <button type="button" class="pill" data-theater="play">Plays</button>
+                <button type="button" class="pill" data-theater="family">Family-friendly</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search button + status -->
+          <div class="search-actions">
+            <button type="button" id="searchBtn" class="btn-primary">
+              Find Events
             </button>
+            <div id="status" class="status muted"></div>
           </div>
         </div>
+      </section>
 
-        <!-- Sports -->
-        <div class="filter-group category-filters" data-category="sports">
-          <h3 class="filter-title">Sports filters</h3>
-
-          <div class="sub-label">Sport</div>
-          <div class="radio-group" id="sportsTypeFilters">
-            <button type="button" class="pill" data-sport="basketball">Basketball</button>
-            <button type="button" class="pill" data-sport="football">Football</button>
-            <button type="button" class="pill" data-sport="baseball">Baseball</button>
-            <button type="button" class="pill" data-sport="hockey">Hockey</button>
-            <button type="button" class="pill" data-sport="soccer">Soccer</button>
-            <button type="button" class="pill" data-sport="other">Other</button>
-          </div>
-
-          <div class="sub-label">Level</div>
-          <div class="radio-group segmented" id="sportsLevelFilters">
-            <button type="button" class="pill active" data-level="any">Any</button>
-            <button type="button" class="pill" data-level="pro">Pro</button>
-            <button type="button" class="pill" data-level="college">College</button>
-          </div>
-        </div>
-
-        <!-- Comedy -->
-        <div class="filter-group category-filters" data-category="comedy">
-          <h3 class="filter-title">Comedy filters</h3>
-          <div class="radio-group" id="comedyTypeFilters">
-            <button type="button" class="pill" data-comedy="standup">Stand-up</button>
-            <button type="button" class="pill" data-comedy="improv">Improv</button>
-            <button type="button" class="pill" data-comedy="club">Comedy club</button>
-          </div>
-        </div>
-
-        <!-- Festivals -->
-        <div class="filter-group category-filters" data-category="festivals">
-          <h3 class="filter-title">Festival filters</h3>
-          <div class="radio-group" id="festivalTypeFilters">
-            <button type="button" class="pill" data-fest="music">Music festivals</button>
-            <button type="button" class="pill" data-fest="food">Food &amp; drink</button>
-            <button type="button" class="pill" data-fest="cultural">Fairs &amp; cultural events</button>
-          </div>
-        </div>
-
-        <!-- Theater -->
-        <div class="filter-group category-filters" data-category="theater">
-          <h3 class="filter-title">Theater filters</h3>
-          <div class="radio-group" id="theaterTypeFilters">
-            <button type="button" class="pill" data-theater="musical">Musicals</button>
-            <button type="button" class="pill" data-theater="play">Plays</button>
-            <button type="button" class="pill" data-theater="family">Family-friendly</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="search-actions">
-        <button type="button" id="searchBtn" class="btn-cta">
-          Find Events
-        </button>
-        <div id="status" class="status muted"></div>
-      </div>
-    </section>
-
-    <!-- Results -->
-    <section class="results-section">
-      <div class="results-header">
-        <div>
-          <h2>Results</h2>
-          <p id="resultsSummary" class="muted">
+      <!-- Results -->
+      <section class="results">
+        <div class="results-header">
+          <h2 class="section-title">Results</h2>
+          <p id="resultsSummary" class="muted results-summary">
             Enter a city &amp; state to see what’s happening nearby.
           </p>
         </div>
-      </div>
 
-      <div id="events" class="events-list"></div>
-    </section>
+        <div id="events" class="events-list"></div>
+      </section>
+    </main>
 
-    <footer class="page-foot muted">
+    <footer class="page-footer muted">
       Event data provided by Ticketmaster Discovery API.
     </footer>
   </div>
