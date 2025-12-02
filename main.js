@@ -1,6 +1,6 @@
 // main.js
 
-const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- put your key here
+const API_KEY = "YOUR_TICKETMASTER_API_KEY_HERE"; // <-- put your key here
 
 const EVENTS_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
 const VENUES_URL = "https://app.ticketmaster.com/discovery/v2/venues.json";
@@ -14,9 +14,31 @@ const statusEl = document.getElementById("status");
 const eventsContainer = document.getElementById("events");
 const resultsSummary = document.getElementById("resultsSummary");
 
-// === Helpers ===
+const toggleFiltersBtn = document.getElementById("toggleFilters");
+const moreFiltersEl = document.getElementById("moreFilters");
+const genreGroup = document.getElementById("genreFilters");
+const timeGroup = document.getElementById("timeFilters");
+const priceGroup = document.getElementById("priceFilters");
 
-// Escape HTML
+// Filter state
+const selectedGenres = new Set(); // multi-select
+let selectedTime = "any";         // "any" | "afternoon" | "evening" | "latenight"
+let selectedPrice = "any";        // "any" | "free" | "under20" | "under50"
+
+// Genre keyword mapping
+const GENRE_KEYWORDS = {
+  pop: ["pop"],
+  rock: ["rock"],
+  hiphop: ["hip hop", "hip-hop", "rap"],
+  rnb: ["r&b", "rnb", "soul"],
+  country: ["country"],
+  edm: ["edm", "electronic", "dance"],
+  indie: ["indie", "alternative", "alt rock", "alt-pop"],
+  jazz: ["jazz"],
+  latin: ["latin"],
+};
+
+// === Helpers ===
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
@@ -26,7 +48,7 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;");
 }
 
-// Parse "City, ST" into { city, stateCode }
+// Parse "City, ST"
 function parseCityState(input) {
   if (!input) return null;
   const parts = input.split(",").map((p) => p.trim()).filter(Boolean);
@@ -37,21 +59,34 @@ function parseCityState(input) {
   return { city, stateCode: state };
 }
 
-// Build date range for a given YYYY-MM-DD string
-function getDateRange(dateStr) {
-  if (!dateStr) return {};
-  const start = new Date(dateStr + "T00:00:00");
-  const end = new Date(dateStr + "T23:59:59");
-
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) return {};
-
-  return {
-    startDateTime: start.toISOString(),
-    endDateTime: end.toISOString(),
-  };
+// Event local date "YYYY-MM-DD"
+function getEventLocalDate(event) {
+  if (event.dates && event.dates.start) {
+    if (event.dates.start.localDate) {
+      return event.dates.start.localDate;
+    }
+    if (event.dates.start.dateTime) {
+      return event.dates.start.dateTime.slice(0, 10);
+    }
+  }
+  return null;
 }
 
-// Heuristic for "small" venues
+// Event local time "HH:MM:SS"
+function getEventLocalTime(event) {
+  if (event.dates && event.dates.start) {
+    if (event.dates.start.localTime) {
+      return event.dates.start.localTime;
+    }
+    if (event.dates.start.dateTime) {
+      const parts = event.dates.start.dateTime.split("T");
+      if (parts[1]) return parts[1].slice(0, 8);
+    }
+  }
+  return null;
+}
+
+// Small-venue heuristic
 function isSmallVenueEvent(event) {
   const venue =
     event._embedded &&
@@ -98,8 +133,6 @@ function isSmallVenueEvent(event) {
   return hasSmall && !hasBig;
 }
 
-// === Location suggestions (Ticketmaster venues) ===
-
 // Debounce utility
 function debounce(fn, delay = 350) {
   let timer;
@@ -109,7 +142,7 @@ function debounce(fn, delay = 350) {
   };
 }
 
-// Fetch venue-based city suggestions
+// === Location suggestions (Ticketmaster venues) ===
 async function fetchLocationSuggestions(query) {
   const params = new URLSearchParams({
     apikey: API_KEY,
@@ -154,7 +187,6 @@ async function fetchLocationSuggestions(query) {
   return suggestions;
 }
 
-// Render suggestions dropdown
 function renderLocationSuggestions(items) {
   if (!items.length) {
     locationSuggestions.innerHTML = "";
@@ -180,7 +212,7 @@ function renderLocationSuggestions(items) {
   locationSuggestions.hidden = false;
 }
 
-// Handle click on suggestion
+// Suggestion events
 locationSuggestions.addEventListener("click", (e) => {
   const target = e.target.closest(".suggest-item");
   if (!target) return;
@@ -191,7 +223,6 @@ locationSuggestions.addEventListener("click", (e) => {
   locationSuggestions.hidden = true;
 });
 
-// Hide suggestions when clicking outside
 document.addEventListener("click", (e) => {
   if (
     !locationSuggestions.contains(e.target) &&
@@ -201,7 +232,6 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// On input, fetch suggestions (debounced)
 const handleLocationInput = debounce(async () => {
   const query = locationInput.value.trim();
   if (query.length < 2) {
@@ -220,8 +250,74 @@ const handleLocationInput = debounce(async () => {
 
 locationInput.addEventListener("input", handleLocationInput);
 
-// === Fetch events ===
-async function fetchEvents(city, stateCode, dateStr) {
+// === More Filters toggle ===
+toggleFiltersBtn.addEventListener("click", () => {
+  const isOpen = !moreFiltersEl.hasAttribute("hidden");
+  if (isOpen) {
+    moreFiltersEl.setAttribute("hidden", "");
+    toggleFiltersBtn.classList.remove("open");
+  } else {
+    moreFiltersEl.removeAttribute("hidden");
+    toggleFiltersBtn.classList.add("open");
+  }
+});
+
+// === Filter group interactions ===
+
+// Genre (multi-select)
+if (genreGroup) {
+  genreGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.genre;
+    if (!val) return;
+
+    if (selectedGenres.has(val)) {
+      selectedGenres.delete(val);
+      pill.classList.remove("active");
+    } else {
+      selectedGenres.add(val);
+      pill.classList.add("active");
+    }
+  });
+}
+
+// Time of night (single-select)
+if (timeGroup) {
+  timeGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.time;
+    if (!val) return;
+
+    selectedTime = val;
+
+    Array.from(timeGroup.querySelectorAll(".pill")).forEach((p) =>
+      p.classList.remove("active")
+    );
+    pill.classList.add("active");
+  });
+}
+
+// Price (single-select)
+if (priceGroup) {
+  priceGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.price;
+    if (!val) return;
+
+    selectedPrice = val;
+
+    Array.from(priceGroup.querySelectorAll(".pill")).forEach((p) =>
+      p.classList.remove("active")
+    );
+    pill.classList.add("active");
+  });
+}
+
+// === Fetch events (no date params; date is filtered client-side) ===
+async function fetchEvents(city, stateCode) {
   const baseParams = {
     apikey: API_KEY,
     city,
@@ -232,25 +328,122 @@ async function fetchEvents(city, stateCode, dateStr) {
     sort: "date,asc",
   };
 
-  const dateParams = getDateRange(dateStr);
-  const params = new URLSearchParams({
-    ...baseParams,
-    ...dateParams,
-  });
-
+  const params = new URLSearchParams(baseParams);
   const url = `${EVENTS_URL}?${params.toString()}`;
-  const res = await fetch(url);
+  console.log("➡️ TM events URL:", url);
+
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (err) {
+    console.error("❌ Network / CORS error when calling Ticketmaster:", err);
+    throw new Error("Network error contacting Ticketmaster.");
+  }
 
   if (!res.ok) {
-    const text = await res.text();
-    console.error("Ticketmaster API error:", res.status, text);
-    throw new Error(`Ticketmaster API error: ${res.status}`);
+    let bodySnippet = "";
+    try {
+      const text = await res.text();
+      bodySnippet = text.slice(0, 200);
+    } catch (_) {}
+
+    const msg = `Ticketmaster error ${res.status} ${res.statusText || ""}`.trim();
+    console.error("❌", msg, "Body snippet:", bodySnippet);
+    throw new Error(msg);
   }
 
   const data = await res.json();
   if (!data._embedded || !data._embedded.events) return [];
 
   return data._embedded.events;
+}
+
+// === Advanced filters (genre, time, price) ===
+function getEventGenres(event) {
+  const out = [];
+  if (event.classifications && event.classifications.length) {
+    const c = event.classifications[0];
+    if (c.segment && c.segment.name) out.push(c.segment.name.toLowerCase());
+    if (c.genre && c.genre.name) out.push(c.genre.name.toLowerCase());
+    if (c.subGenre && c.subGenre.name) out.push(c.subGenre.name.toLowerCase());
+  }
+  return out;
+}
+
+function matchesGenreFilter(event) {
+  if (selectedGenres.size === 0) return true; // no genre filter
+
+  const eventGenres = getEventGenres(event);
+  if (!eventGenres.length) return true; // don't hide if unknown
+
+  const lowered = eventGenres.join(" | ");
+
+  for (const value of selectedGenres) {
+    const keywords = GENRE_KEYWORDS[value] || [];
+    for (const kw of keywords) {
+      if (lowered.includes(kw)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function matchesTimeFilter(event) {
+  if (selectedTime === "any") return true;
+
+  const t = getEventLocalTime(event);
+  if (!t) return true;
+  const hour = parseInt(t.slice(0, 2), 10);
+  if (Number.isNaN(hour)) return true;
+
+  if (selectedTime === "afternoon") {
+    return hour < 18;
+  }
+  if (selectedTime === "evening") {
+    return hour >= 18 && hour < 21;
+  }
+  if (selectedTime === "latenight") {
+    return hour >= 21;
+  }
+
+  return true;
+}
+
+function getEventMinPrice(event) {
+  if (event.priceRanges && event.priceRanges.length) {
+    const p = event.priceRanges[0];
+    if (typeof p.min === "number") return p.min;
+  }
+  return null;
+}
+
+function matchesPriceFilter(event) {
+  if (selectedPrice === "any") return true;
+
+  const min = getEventMinPrice(event);
+  if (min == null) return false; // no info, be conservative
+
+  if (selectedPrice === "free") {
+    return min === 0;
+  }
+  if (selectedPrice === "under20") {
+    return min > 0 && min <= 20;
+  }
+  if (selectedPrice === "under50") {
+    return min > 0 && min <= 50;
+  }
+
+  return true;
+}
+
+function applyAdvancedFilters(events) {
+  return events.filter((event) => {
+    if (!matchesGenreFilter(event)) return false;
+    if (!matchesTimeFilter(event)) return false;
+    if (!matchesPriceFilter(event)) return false;
+    return true;
+  });
 }
 
 // === Render events ===
@@ -343,7 +536,7 @@ function renderEvents(events) {
 // === Search handler ===
 async function handleSearch() {
   const rawLocation = locationInput.value.trim();
-  const dateStr = dateInput.value || "";
+  const dateStr = dateInput.value || ""; // "YYYY-MM-DD" or ""
 
   const parsed = parseCityState(rawLocation);
 
@@ -363,41 +556,59 @@ async function handleSearch() {
   resultsSummary.textContent = "";
 
   try {
-    const events = await fetchEvents(city, stateCode, dateStr);
-
-    // Filter to small venues only
-    const smallEvents = events.filter(isSmallVenueEvent);
+    const events = await fetchEvents(city, stateCode);
 
     if (!events.length) {
-      statusEl.textContent = "No events found. Try another city or date.";
-      resultsSummary.textContent = `No events for ${city}, ${stateCode}${dateStr ? " on selected date" : ""}.`;
+      statusEl.textContent = "No events found. Try another city.";
+      resultsSummary.textContent = `No events for ${city}, ${stateCode}.`;
       renderEvents([]);
       return;
     }
 
-    if (!smallEvents.length) {
-      statusEl.textContent =
-        "We found music events, but none that look like small bar/club shows.";
-      resultsSummary.textContent = `No small-venue shows for ${city}, ${stateCode}${dateStr ? " on selected date" : ""}.`;
+    // 1) Only small venues
+    let filtered = events.filter(isSmallVenueEvent);
+
+    // 2) Date filter (client-side)
+    if (dateStr) {
+      filtered = filtered.filter((event) => {
+        const eventDate = getEventLocalDate(event);
+        return eventDate === dateStr;
+      });
+    }
+
+    // 3) Advanced filters (genre, time, price)
+    filtered = applyAdvancedFilters(filtered);
+
+    if (!filtered.length) {
+      if (dateStr) {
+        statusEl.textContent =
+          "No shows match those filters on that date. Try adjusting filters or clearing the date.";
+        resultsSummary.textContent = `No small-venue shows for ${city}, ${stateCode} that match your filters on that date.`;
+      } else {
+        statusEl.textContent =
+          "No shows match those filters. Try adjusting your filters.";
+        resultsSummary.textContent = `No small-venue shows for ${city}, ${stateCode} that match your filters.`;
+      }
       renderEvents([]);
       return;
     }
 
-    statusEl.textContent = `Found ${smallEvents.length} small-venue show(s).`;
-    resultsSummary.textContent = `Showing small-venue music events for ${city}, ${stateCode}${dateStr ? " on your selected date" : ""}.`;
-    renderEvents(smallEvents);
+    statusEl.textContent = `Found ${filtered.length} small-venue show(s).`;
+    resultsSummary.textContent = `Showing small-venue music events for ${city}, ${stateCode}${
+      dateStr ? " on your selected date" : ""
+    } with your filters applied.`;
+    renderEvents(filtered);
   } catch (err) {
-    console.error("Error loading shows:", err);
+    console.error("🔥 Error loading shows:", err);
     statusEl.textContent =
-      "We couldn't load shows right now. Please try again in a moment.";
+      err.message || "We couldn't load shows right now. Please try again in a moment.";
     resultsSummary.textContent = "Error loading events from Ticketmaster.";
   }
 }
 
-// Button click
+// Button + Enter key
 searchBtn.addEventListener("click", handleSearch);
 
-// Enter key shortcuts
 locationInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
