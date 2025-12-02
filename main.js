@@ -1,6 +1,6 @@
-// main.js — Local Shows (no Netlify functions, direct Ticketmaster)
+// main.js — Local Shows (direct Ticketmaster call, no Netlify functions)
 
-/* ---------- DOM HOOKS ---------- */
+// ----- DOM HOOKS -----
 const eventsContainer = document.getElementById("events");
 const statusEl = document.getElementById("status");
 
@@ -13,14 +13,14 @@ const cityInput = document.getElementById("city-input");
 const stateSelect = document.getElementById("state-select");
 const applyLocationBtn = document.getElementById("apply-location");
 
-// 🔑 Ticketmaster key (same one you use in Concerto+)
+// ✅ Your Ticketmaster key (same as Concerto+)
 const TM_API_KEY = "oMkciJfNTvAuK1N4O1XXe49pdPEeJQuh";
 
-// Current filter
+// Keep track of current filter range
 let currentRange = "tonight";
 let currentDateStr = null;
 
-/* ---------- FILTER TABS ---------- */
+// ============= FILTER BUTTONS =============
 filterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     filterButtons.forEach((b) => b.classList.remove("active"));
@@ -62,61 +62,52 @@ if (applyLocationBtn) {
   });
 }
 
-/* ---------- TIME RANGE → ISO STRINGS (for Ticketmaster) ---------- */
-function getIsoRange(range, dateStr) {
+// ============= TIME RANGE HELPERS =============
+function getUnixRange(range, dateStr) {
   const now = new Date();
   const start = new Date();
   const end = new Date();
 
   if (range === "tonight") {
-    // now → 3am
+    // Tonight = now → 3am
     start.setTime(now.getTime());
     end.setDate(start.getDate() + 1);
     end.setHours(3, 0, 0, 0);
   } else if (range === "week") {
-    // next 7 days (midnight → end of last day)
+    // Next 7 days
     start.setHours(0, 0, 0, 0);
     end.setDate(start.getDate() + 7);
     end.setHours(23, 59, 59, 999);
   } else if (range === "date" && dateStr) {
-    // Specific local date
+    // Specific calendar date (local)
     const d = new Date(dateStr + "T00:00:00");
     start.setTime(d.getTime());
     start.setHours(0, 0, 0, 0);
     end.setTime(d.getTime());
     end.setHours(23, 59, 59, 999);
   } else {
-    // Default → tonight
+    // Default = tonight
     start.setTime(now.getTime());
     end.setDate(start.getDate() + 1);
     end.setHours(3, 0, 0, 0);
   }
 
   return {
-    startIso: start.toISOString(),
-    endIso: end.toISOString(),
+    start: Math.floor(start.getTime() / 1000),
+    end: Math.floor(end.getTime() / 1000),
   };
 }
 
-/* ---------- BUILD TICKETMASTER URL ---------- */
-function buildTicketmasterUrl({ city, state, startIso, endIso }) {
-  const url = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
-  url.searchParams.set("apikey", TM_API_KEY);
-  url.searchParams.set("city", city);
-  if (state) url.searchParams.set("stateCode", state);
-  url.searchParams.set("countryCode", "US");
-  url.searchParams.set("startDateTime", startIso);
-  url.searchParams.set("endDateTime", endIso);
-  url.searchParams.set("sort", "date,asc");
-  url.searchParams.set("size", "100");
-  return url.toString();
+// Convert our unix range → ISO strings Ticketmaster expects
+function toIsoFromUnix(sec) {
+  return new Date(sec * 1000).toISOString();
 }
 
-/* ---------- MAIN FETCH ---------- */
+// ============= MAIN FETCH =============
 async function fetchAndRender(range = "tonight", dateStr = null) {
   try {
-    const city = (cityInput.value || "").trim();
-    const state = (stateSelect.value || "").trim();
+    const city = cityInput.value.trim();
+    const state = stateSelect.value.trim();
 
     if (!city || !state) {
       statusEl.textContent =
@@ -125,35 +116,82 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
       return;
     }
 
-    if (!TM_API_KEY || TM_API_KEY === "YOUR_TICKETMASTER_KEY_HERE") {
-      statusEl.textContent =
-        "Ticket search is not configured yet. Add your Ticketmaster key in main.js.";
-      eventsContainer.innerHTML = "";
+    if (!TM_API_KEY) {
+      statusEl.textContent = "Ticket search is not configured (missing API key).";
+      console.error("TM_API_KEY is missing");
       return;
     }
 
     statusEl.textContent = "Finding shows in your area...";
     eventsContainer.innerHTML = "";
 
-    const { startIso, endIso } = getIsoRange(range, dateStr);
-    const url = buildTicketmasterUrl({ city, state, startIso, endIso });
+    const { start, end } = getUnixRange(range, dateStr);
+    const startIso = toIsoFromUnix(start);
+    const endIso = toIsoFromUnix(end);
 
-    const res = await fetch(url);
+    // Build Ticketmaster Discovery URL
+    const tmUrl = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
+    tmUrl.searchParams.set("apikey", TM_API_KEY);
+    tmUrl.searchParams.set("city", city);
+    tmUrl.searchParams.set("stateCode", state);
+    tmUrl.searchParams.set("countryCode", "US");
+    tmUrl.searchParams.set("startDateTime", startIso);
+    tmUrl.searchParams.set("endDateTime", endIso);
+    tmUrl.searchParams.set("sort", "date,asc");
+    tmUrl.searchParams.set("size", "100"); // up to 100 events
+
+    const res = await fetch(tmUrl.toString());
+
     if (!res.ok) {
-      const txt = await res.text();
-      console.error("Ticketmaster error:", res.status, txt);
-      throw new Error("Ticketmaster API request failed");
-    }
+      const text = await res.text();
+      console.error("Ticketmaster error:", res.status, text);
 
-    const json = await res.json();
-    const rawEvents = json?._embedded?.events || [];
-    const events = rawEvents.map(mapTicketmasterEvent);
-
-    if (!events.length) {
-      statusEl.textContent =
-        "No shows found for that city and date range. Try a different filter or date.";
+      if (res.status === 401 || res.status === 403) {
+        statusEl.textContent =
+          "Ticket search is blocked. Double-check your Ticketmaster API key.";
+      } else {
+        statusEl.textContent =
+          "We couldn't load shows right now. Please try again in a moment.";
+      }
       return;
     }
+
+    const data = await res.json();
+    console.log("Ticketmaster data:", data);
+
+    const rawEvents = data._embedded?.events || [];
+    if (!rawEvents.length) {
+      statusEl.textContent =
+        "No shows found for that city and date range. Try a different filter or date.";
+      eventsContainer.innerHTML = "";
+      return;
+    }
+
+    const events = rawEvents.map((ev) => {
+      const venue = ev._embedded?.venues?.[0] || {};
+      const images = ev.images || [];
+      const img = images.find((i) => i.url) || {};
+      const priceRanges = ev.priceRanges || [];
+      const pr = priceRanges[0] || {};
+
+      return {
+        id: ev.id,
+        name: ev.name,
+        description: ev.info || ev.pleaseNote || "",
+        time_start: ev.dates?.start?.dateTime || null,
+        url: ev.url || null,
+        image_url: img.url || null,
+        venue: {
+          name: venue.name || "",
+          address1: venue.address?.line1 || "",
+          city: venue.city?.name || "",
+          state: venue.state?.stateCode || "",
+          country: venue.country?.countryCode || "",
+        },
+        price_min: pr.min ?? null,
+        price_max: pr.max ?? null,
+      };
+    });
 
     statusEl.textContent = `Showing ${events.length} performances in ${city}, ${state}.`;
     renderEvents(events);
@@ -164,34 +202,7 @@ async function fetchAndRender(range = "tonight", dateStr = null) {
   }
 }
 
-/* ---------- MAP TM EVENT → SIMPLE OBJECT ---------- */
-function mapTicketmasterEvent(ev) {
-  const venue = (ev._embedded && ev._embedded.venues && ev._embedded.venues[0]) || {};
-  const images = ev.images || [];
-  const img = images.find((i) => i.url) || {};
-  const priceRanges = ev.priceRanges || [];
-  const pr = priceRanges[0] || {};
-
-  return {
-    id: ev.id,
-    name: ev.name,
-    description: ev.info || ev.pleaseNote || "",
-    time_start: ev.dates?.start?.dateTime || null,
-    url: ev.url || null,
-    image_url: img.url || null,
-    venue: {
-      name: venue.name || "",
-      address1: venue.address?.line1 || "",
-      city: venue.city?.name || "",
-      state: venue.state?.stateCode || "",
-      country: venue.country?.countryCode || "",
-    },
-    price_min: pr.min ?? null,
-    price_max: pr.max ?? null,
-  };
-}
-
-/* ---------- RENDER CARDS ---------- */
+// ============= RENDER CARDS =============
 function renderEvents(events) {
   eventsContainer.innerHTML = "";
   events.forEach((ev) => {
@@ -292,4 +303,4 @@ function renderEvents(events) {
   });
 }
 
-// No auto-load on page load; user must select city/state and tap "Find Shows".
+// NOTE: No default fetch on load — user must pick city/state and tap "Find Shows".
