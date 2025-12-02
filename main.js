@@ -1,299 +1,231 @@
-const eventsContainer = document.getElementById("events");
+// main.js
+
+const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- put your key here
+const BASE_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
+
+// DOM elements
+const form = document.getElementById("search-form");
+const cityInput = document.getElementById("cityInput");
+const stateInput = document.getElementById("stateInput");
+const smallOnlyCheckbox = document.getElementById("smallOnly");
 const statusEl = document.getElementById("status");
+const eventsContainer = document.getElementById("events");
 
-// Filters
-const filterButtons = document.querySelectorAll(".filter-btn");
-const dateInput = document.getElementById("date-picker");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-// Location inputs
-const cityInput = document.getElementById("city-input");
-const stateSelect = document.getElementById("state-select");
-const applyLocationBtn = document.getElementById("apply-location");
+  const city = cityInput.value.trim();
+  const state = stateInput.value.trim().toUpperCase();
+  const smallOnly = smallOnlyCheckbox.checked;
 
-// 🔑 Put your working Ticketmaster Discovery API key here
-const TM_KEY = "YOUR_TICKETMASTER_API_KEY";
-
-// Keep track of current filter range
-let currentRange = "tonight";
-let currentDateStr = null;
-
-// ------------- EVENT LISTENERS -------------
-
-filterButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    filterButtons.forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const range = btn.dataset.range;
-    currentRange = range;
-
-    if (range === "date") {
-      if (dateInput) dateInput.style.display = "block";
-
-      if (dateInput && dateInput.value) {
-        currentDateStr = dateInput.value;
-        fetchAndRender("date", currentDateStr);
-      } else {
-        statusEl.textContent = "Pick a date to see shows.";
-        eventsContainer.innerHTML = "";
-      }
-    } else {
-      if (dateInput) dateInput.style.display = "none";
-      currentDateStr = null;
-      fetchAndRender(range);
-    }
-  });
-});
-
-if (dateInput) {
-  dateInput.addEventListener("change", () => {
-    if (currentRange === "date" && dateInput.value) {
-      currentDateStr = dateInput.value;
-      fetchAndRender("date", currentDateStr);
-    }
-  });
-}
-
-if (applyLocationBtn) {
-  applyLocationBtn.addEventListener("click", () => {
-    // When user hits "Find Shows", re-run with the current filter
-    fetchAndRender(currentRange, currentDateStr);
-  });
-}
-
-// ------------- TIME RANGE -> ISO STRINGS -------------
-
-function getIsoRange(range, dateStr) {
-  const now = new Date();
-  const start = new Date();
-  const end = new Date();
-
-  if (range === "tonight") {
-    // Tonight = now → 3am tomorrow
-    start.setTime(now.getTime());
-    end.setDate(start.getDate() + 1);
-    end.setHours(3, 0, 0, 0);
-  } else if (range === "week") {
-    // Next 7 days
-    start.setHours(0, 0, 0, 0);
-    end.setDate(start.getDate() + 7);
-    end.setHours(23, 59, 59, 999);
-  } else if (range === "date" && dateStr) {
-    // Specific calendar date (local)
-    const d = new Date(dateStr + "T00:00:00");
-    start.setTime(d.getTime());
-    start.setHours(0, 0, 0, 0);
-    end.setTime(d.getTime());
-    end.setHours(23, 59, 59, 999);
-  } else {
-    // Default = tonight
-    start.setTime(now.getTime());
-    end.setDate(start.getDate() + 1);
-    end.setHours(3, 0, 0, 0);
+  if (!city || !state || state.length !== 2) {
+    statusEl.textContent = "Please enter a city and 2-letter state code.";
+    return;
   }
 
-  // Ticketmaster wants UTC ISO (with trailing Z)
-  const startIso = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString();
-  const endIso = new Date(end.getTime() - end.getTimezoneOffset() * 60000).toISOString();
+  eventsContainer.innerHTML = "";
+  statusEl.textContent = `Searching for music shows in ${city}, ${state}...`;
 
-  return { startIso, endIso };
-}
-
-// ------------- MAIN FETCH (DIRECT TO TICKETMASTER) -------------
-
-async function fetchAndRender(range = "tonight", dateStr = null) {
   try {
-    const city = cityInput.value.trim();
-    const state = stateSelect.value.trim();
+    const events = await fetchEvents(city, state);
 
-    if (!city || !state) {
+    if (!events || events.length === 0) {
+      statusEl.textContent = "No music events found. Try another city or date range.";
+      return;
+    }
+
+    let filtered = events;
+
+    if (smallOnly) {
+      filtered = events.filter(isSmallVenueEvent);
+    }
+
+    if (filtered.length === 0) {
       statusEl.textContent =
-        'Select your city and state, then tap "Find Shows".';
-      eventsContainer.innerHTML = "";
+        "We found music events, but none that look like small bar/club shows. Try unchecking 'Small venues only'.";
       return;
     }
 
-    if (!TM_KEY || TM_KEY === "YOUR_TICKETMASTER_API_KEY") {
-      statusEl.textContent = "Ticket search is not configured yet.";
-      eventsContainer.innerHTML = "";
-      console.error("Missing TM_KEY in main.js");
-      return;
-    }
-
-    statusEl.textContent = "Finding shows in your area...";
-    eventsContainer.innerHTML = "";
-
-    const { startIso, endIso } = getIsoRange(range, dateStr);
-
-    const url = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
-    url.searchParams.set("apikey", TM_KEY);
-    url.searchParams.set("city", city);
-    url.searchParams.set("stateCode", state);
-    url.searchParams.set("countryCode", "US");
-    url.searchParams.set("startDateTime", startIso);
-    url.searchParams.set("endDateTime", endIso);
-    url.searchParams.set("sort", "date,asc");
-    url.searchParams.set("size", "100");
-    url.searchParams.set("segmentName", "Music");
-
-    const res = await fetch(url.toString());
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Ticketmaster error:", res.status, text);
-      statusEl.textContent =
-        "We couldn't load shows right now. Please try again in a moment.";
-      return;
-    }
-
-    const tmData = await res.json();
-    console.log("Ticketmaster data:", tmData);
-
-    const rawEvents = tmData._embedded?.events || [];
-
-    const events = rawEvents.map((ev) => {
-      const venue = ev._embedded?.venues?.[0] || {};
-      const images = ev.images || [];
-      const img = images.find((i) => i.url) || {};
-      const priceRanges = ev.priceRanges || [];
-      const pr = priceRanges[0] || {};
-
-      return {
-        id: ev.id,
-        name: ev.name,
-        description: ev.info || ev.pleaseNote || "",
-        time_start: ev.dates?.start?.dateTime || null,
-        url: ev.url || null,
-        image_url: img.url || null,
-        venue: {
-          name: venue.name || "",
-          address1: venue.address?.line1 || "",
-          city: venue.city?.name || "",
-          state: venue.state?.stateCode || "",
-          country: venue.country?.countryCode || "",
-        },
-        price_min: pr.min ?? null,
-        price_max: pr.max ?? null,
-      };
-    });
-
-    if (!events.length) {
-      statusEl.textContent =
-        "No shows found for that city and date range. Try a different filter or date.";
-      eventsContainer.innerHTML = "";
-      return;
-    }
-
-    statusEl.textContent = `Showing ${events.length} performances in ${city}, ${state}.`;
-    renderEvents(events);
+    statusEl.textContent = `Found ${filtered.length} show(s).`;
+    renderEvents(filtered);
   } catch (err) {
-    console.error("fetchAndRender error:", err);
+    console.error("Error loading shows:", err);
     statusEl.textContent =
       "We couldn't load shows right now. Please try again in a moment.";
   }
+});
+
+/**
+ * Call Ticketmaster Discovery API with city + state.
+ */
+async function fetchEvents(city, stateCode) {
+  const params = new URLSearchParams({
+    apikey: API_KEY,
+    city,
+    stateCode,
+    countryCode: "US",
+    segmentName: "Music", // limit to music
+    size: "100",
+    sort: "date,asc",
+  });
+
+  const url = `${BASE_URL}?${params.toString()}`;
+
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    // Surface some info in console; user-facing error is handled above
+    const text = await res.text();
+    console.error("Ticketmaster API error:", res.status, text);
+    throw new Error(`Ticketmaster API error: ${res.status}`);
+  }
+
+  const data = await res.json();
+
+  if (!data._embedded || !data._embedded.events) {
+    return [];
+  }
+
+  return data._embedded.events;
 }
 
-// ------------- RENDER CARDS -------------
+/**
+ * Heuristic: try to keep it to bar/club-type venues.
+ * We look at the venue name and keep ones that contain
+ * "bar", "club", "pub", etc. and avoid big arena words.
+ */
+function isSmallVenueEvent(event) {
+  const venue =
+    event._embedded &&
+    event._embedded.venues &&
+    event._embedded.venues[0];
 
+  if (!venue || !venue.name) return false;
+
+  const name = venue.name.toLowerCase();
+
+  const smallKeywords = [
+    "bar",
+    "pub",
+    "club",
+    "lounge",
+    "tavern",
+    "saloon",
+    "grill",
+    "taproom",
+    "brewing",
+    "brewery",
+    "cafe",
+    "caf\u00e9",
+    "music hall",
+  ];
+
+  const bigVenueKeywords = [
+    "stadium",
+    "arena",
+    "center",
+    "centre",
+    "coliseum",
+    "ampitheatre", // common misspells
+    "amphitheatre",
+    "amphitheater",
+    "ballpark",
+    "field",
+    "pavilion",
+  ];
+
+  const hasSmall = smallKeywords.some((k) => name.includes(k));
+  const hasBig = bigVenueKeywords.some((k) => name.includes(k));
+
+  return hasSmall && !hasBig;
+}
+
+/**
+ * Render cards into the page.
+ */
 function renderEvents(events) {
   eventsContainer.innerHTML = "";
-  events.forEach((ev) => {
+
+  events.forEach((event) => {
+    const venue =
+      event._embedded &&
+      event._embedded.venues &&
+      event._embedded.venues[0];
+
+    const eventName = event.name || "Untitled event";
+    const url = event.url || "#";
+
+    // Date/time
+    let displayDate = "Date TBA";
+    if (event.dates && event.dates.start) {
+      const { dateTime, localDate, localTime } = event.dates.start;
+      const raw = dateTime || (localDate && `${localDate}T${localTime || "00:00:00"}`);
+      if (raw) {
+        const d = new Date(raw);
+        if (!isNaN(d.getTime())) {
+          displayDate = d.toLocaleString(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          });
+        }
+      }
+    }
+
+    const venueName = venue && venue.name ? venue.name : "Venue TBA";
+
+    const addressLine = venue && venue.address && venue.address.line1
+      ? venue.address.line1
+      : "";
+
+    const cityStateZip = [
+      venue && venue.city && venue.city.name,
+      venue && venue.state && venue.state.stateCode,
+      venue && venue.postalCode,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const isSmallTag = isSmallVenueEvent(event) ? "Small venue" : "Venue";
+
     const card = document.createElement("article");
     card.className = "event-card";
 
-    const img = document.createElement("img");
-    img.className = "event-image";
-    img.src = ev.image_url || "";
-    img.alt = ev.name || "Event image";
+    card.innerHTML = `
+      <h3 class="event-title">${escapeHtml(eventName)}</h3>
+      <div class="event-meta">
+        <div><strong>When:</strong> ${escapeHtml(displayDate)}</div>
+        <div><strong>Where:</strong> ${escapeHtml(venueName)}</div>
+      </div>
+      <div class="event-address">
+        ${escapeHtml(addressLine)}
+        ${addressLine && cityStateZip ? "<br>" : ""}
+        ${escapeHtml(cityStateZip)}
+      </div>
+      <div class="event-footer">
+        <span class="venue-tag">${escapeHtml(isSmallTag)}</span>
+        ${
+          url && url !== "#"
+            ? `<a class="ticket-link" href="${url}" target="_blank" rel="noopener noreferrer">Tickets / Info</a>`
+            : ""
+        }
+      </div>
+    `;
 
-    const main = document.createElement("div");
-    main.className = "event-main";
-
-    const nameEl = document.createElement("div");
-    nameEl.className = "event-name";
-    nameEl.textContent = ev.name || "Live Music";
-
-    const metaEl = document.createElement("div");
-    metaEl.className = "event-meta";
-
-    const date = ev.time_start ? new Date(ev.time_start) : null;
-    const timeStr = date
-      ? date.toLocaleString(undefined, {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-        })
-      : "Time TBA";
-
-    const venue = ev.venue || {};
-    const locStr =
-      venue.address1 ||
-      venue.city ||
-      venue.name
-        ? `${venue.name ? venue.name + " • " : ""}${venue.address1 || ""} ${
-            venue.city || ""
-          }, ${venue.state || ""}`.trim()
-        : "Location TBA";
-
-    metaEl.textContent = `${timeStr} • ${locStr}`;
-
-    const descEl = document.createElement("div");
-    descEl.className = "event-description";
-    descEl.textContent = ev.description || "";
-
-    const tagsEl = document.createElement("div");
-    tagsEl.className = "event-tags";
-
-    if (ev.price_min != null || ev.price_max != null) {
-      const pill = document.createElement("span");
-      pill.className = "tag-pill";
-      const min = ev.price_min != null ? `$${ev.price_min.toFixed(0)}` : "";
-      const max = ev.price_max != null ? `$${ev.price_max.toFixed(0)}` : "";
-      pill.textContent = max && max !== min ? `${min}–${max}` : min || "Paid";
-      tagsEl.appendChild(pill);
-    }
-
-    const actions = document.createElement("div");
-    actions.className = "event-actions";
-
-    if (ev.url) {
-      const btn = document.createElement("a");
-      btn.className = "btn-outline";
-      btn.href = ev.url;
-      btn.target = "_blank";
-      btn.rel = "noopener noreferrer";
-      btn.textContent = "View Event";
-      actions.appendChild(btn);
-    }
-
-    const planBtn = document.createElement("button");
-    planBtn.className = "btn-outline";
-    planBtn.textContent = "Plan Your Night";
-    planBtn.addEventListener("click", () => {
-      if (venue && (venue.address1 || venue.name || venue.city)) {
-        const q = encodeURIComponent(
-          `${venue.name || ""} ${venue.address1 || ""} ${venue.city || ""} ${
-            venue.state || ""
-          }`
-        );
-        window.open(`https://maps.apple.com/?q=${q}`, "_blank");
-      }
-    });
-    actions.appendChild(planBtn);
-
-    main.appendChild(nameEl);
-    main.appendChild(metaEl);
-    main.appendChild(descEl);
-    main.appendChild(tagsEl);
-    main.appendChild(actions);
-
-    card.appendChild(img);
-    card.appendChild(main);
     eventsContainer.appendChild(card);
   });
 }
 
-// NOTE: Still no default fetch on load.
-// User has to pick city/state and hit "Find Shows".
+/**
+ * Simple HTML escaping to avoid weird characters breaking layout.
+ */
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
