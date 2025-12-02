@@ -14,7 +14,7 @@ body {
 .container {
   max-width: 960px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1.25rem 1.25rem 1.5rem;
 }
 
 /* Header / Footer */
@@ -49,7 +49,7 @@ body {
   margin-bottom: 1.5rem;
   background: rgba(18, 26, 54, 0.9);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.25rem 1.25rem 1.4rem;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -67,18 +67,19 @@ body {
 }
 
 .field-group label {
-  font-size: 0.85rem;
-  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
   color: #c5cae9;
 }
 
 .field-group input[type="text"] {
-  padding: 0.6rem 0.75rem;
-  border-radius: 8px;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(6, 10, 28, 0.9);
   color: #ffffff;
   outline: none;
+  font-size: 0.95rem;
 }
 
 .field-group input[type="text"]::placeholder {
@@ -93,19 +94,20 @@ body {
 .checkbox-group {
   flex-direction: row;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   flex: 1 1 100%;
+  font-size: 0.9rem;
 }
 
 .checkbox-group input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 /* Button */
 
 .btn-primary {
-  padding: 0.7rem 1.6rem;
+  padding: 0.8rem 1.7rem;
   border-radius: 999px;
   border: none;
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
@@ -114,6 +116,7 @@ body {
   cursor: pointer;
   transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.1s ease;
   flex: 0 0 auto;
+  font-size: 0.95rem;
 }
 
 .btn-primary:hover {
@@ -159,17 +162,17 @@ body {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .event-title {
-  font-size: 1rem;
+  font-size: 1.02rem;
   font-weight: 600;
   margin: 0;
 }
 
 .event-meta {
-  font-size: 0.85rem;
+  font-size: 0.87rem;
   color: #b3b9d6;
 }
 
@@ -179,8 +182,9 @@ body {
 }
 
 .event-address {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: #a5aac1;
+  line-height: 1.4;
 }
 
 .event-footer {
@@ -188,7 +192,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   font-size: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .venue-tag {
@@ -205,7 +211,7 @@ body {
   text-decoration: none;
   font-size: 0.83rem;
   font-weight: 500;
-  padding: 0.35rem 0.8rem;
+  padding: 0.4rem 0.9rem;
   border-radius: 999px;
   border: 1px solid #7c3aed;
   background: rgba(73, 63, 252, 0.2);
@@ -218,15 +224,103 @@ body {
   transform: translateY(-1px);
 }
 
+/* Medium breakpoint tweaks */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 1rem 1.25rem;
+  }
+
+  .site-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .search-section {
+    padding: 1.1rem 1.1rem 1.3rem;
+  }
+}
+
 /* Small screen tweaks */
 
 @media (max-width: 600px) {
+  .container {
+    padding: 0.9rem 0.9rem 1.2rem;
+  }
+
+  .site-header .container {
+    text-align: center;
+  }
+
+  .site-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .site-header p {
+    font-size: 0.9rem;
+  }
+
   .search-form {
     flex-direction: column;
     align-items: stretch;
   }
 
+  .field-group {
+    flex: 1 1 auto;
+  }
+
   .btn-primary {
     width: 100%;
+    text-align: center;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr; /* force single column */
+    gap: 0.9rem;
+  }
+
+  .event-card {
+    padding: 0.9rem 0.85rem;
+  }
+
+  .event-title {
+    font-size: 0.98rem;
+  }
+
+  .event-meta,
+  .event-address {
+    font-size: 0.84rem;
+  }
+
+  .event-footer {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+/* Ultra-small phones (older / narrow devices) */
+
+@media (max-width: 380px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .search-section {
+    padding: 0.85rem;
+  }
+
+  .event-card {
+    padding: 0.75rem;
+  }
+
+  .ticket-link {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    display: inline-block;
+  }
+
+  .event-footer {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
