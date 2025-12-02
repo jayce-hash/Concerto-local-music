@@ -1,6 +1,6 @@
 // main.js
 
-const API_KEY = "YOUR_TICKETMASTER_API_KEY_HERE"; // <-- put your key here
+const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- put your key here
 
 const EVENTS_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
 const VENUES_URL = "https://app.ticketmaster.com/discovery/v2/venues.json";
