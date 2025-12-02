@@ -722,7 +722,7 @@ function renderEvents(events) {
       event._embedded.venues[0];
 
     const eventName = event.name || "Untitled event";
-    const url = event.url || "#";
+    const url = event.url || "";
 
     // Date/time
     let displayDate = "Date TBA";
@@ -776,8 +776,11 @@ function renderEvents(events) {
       </div>
       <div class="event-footer">
         ${
-          url && url !== "#"
-            ? `<a class="event-ticket-btn" href="${url}" target="_blank" rel="noopener noreferrer">
+          url
+            ? `<a class="event-ticket-btn"
+                  href="${url}"
+                  target="_blank"
+                  rel="noopener noreferrer">
                  Tickets / Info
                </a>`
             : ""
