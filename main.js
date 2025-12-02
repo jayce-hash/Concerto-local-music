@@ -774,15 +774,10 @@ function renderEvents(events) {
         ${addressLine && cityStateZip ? "<br>" : ""}
         ${escapeHtml(cityStateZip)}
       </div>
-            <div class="event-footer">
+                  <div class="event-footer">
         ${
           url
-            ? `<a
-                 class="event-ticket-btn"
-                 href="${url}"
-                 target="_blank"
-                 rel="noopener noreferrer"
-               >
+            ? `<a class="event-ticket-btn" href="${url}">
                  Tickets / Info
                </a>`
             : ""
