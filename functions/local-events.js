@@ -1,6 +1,6 @@
 // netlify/functions/local-events.js
 
-// 🔑 Paste the SAME Ticketmaster API key you use in app.js here:
+// 🔑 Directly use your Ticketmaster key here
 const TM_API_KEY = "oMkciJfNTvAuK1N4O1XXe49pdPEeJQuh";
 
 const CORS_HEADERS = {
@@ -10,7 +10,7 @@ const CORS_HEADERS = {
 };
 
 exports.handler = async (event) => {
-  // Handle CORS preflight
+  // Handle preflight
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
@@ -20,8 +20,14 @@ exports.handler = async (event) => {
   }
 
   try {
+    const qs = event.queryStringParameters || {};
+    const city = qs.city;
+    const state = qs.state;
+    const startUnix = qs.start_date;
+    const endUnix = qs.end_date;
+
     if (!TM_API_KEY) {
-      console.error("TM_API_KEY is missing in local-events.js");
+      console.error("TM_API_KEY not set");
       return {
         statusCode: 500,
         headers: CORS_HEADERS,
@@ -29,28 +35,18 @@ exports.handler = async (event) => {
       };
     }
 
-    const qs = event.queryStringParameters || {};
-    const city = qs.city;
-    const state = qs.state;
-    const startUnix = qs.start_date;
-    const endUnix = qs.end_date;
-
     if (!city || !state || !startUnix || !endUnix) {
       return {
         statusCode: 400,
         headers: CORS_HEADERS,
-        body: JSON.stringify({
-          error: "Missing city, state, start_date, or end_date",
-        }),
+        body: JSON.stringify({ error: "Missing city, state, or date range" }),
       };
     }
 
     const startIso = new Date(Number(startUnix) * 1000).toISOString();
     const endIso = new Date(Number(endUnix) * 1000).toISOString();
 
-    const tmUrl = new URL(
-      "https://app.ticketmaster.com/discovery/v2/events.json"
-    );
+    const tmUrl = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
     tmUrl.searchParams.set("apikey", TM_API_KEY);
     tmUrl.searchParams.set("city", city);
     tmUrl.searchParams.set("stateCode", state);
@@ -61,7 +57,6 @@ exports.handler = async (event) => {
     tmUrl.searchParams.set("size", "100");
 
     const tmRes = await fetch(tmUrl.toString());
-
     if (!tmRes.ok) {
       const text = await tmRes.text();
       console.error("Ticketmaster error:", tmRes.status, text);
