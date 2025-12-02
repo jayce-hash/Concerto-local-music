@@ -4,66 +4,88 @@
   <meta charset="UTF-8" />
   <title>Local Music Finder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fonts to match Concerto+ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Lora:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
+  <div class="container narrow">
+    <header class="page-head">
       <h1>Local Music Finder</h1>
-      <p>Discover small local shows at bars and clubs in your area.</p>
-    </div>
-  </header>
+      <p class="muted">
+        Discover small local shows at bars, clubs, and lounges &mdash; no arenas, no giant stadiums.
+      </p>
+    </header>
 
-  <main class="container">
-    <section class="search-section">
-      <form id="search-form" class="search-form">
-        <div class="field-group">
-          <label for="cityInput">City</label>
+    <!-- Search Card -->
+    <section class="card search-card">
+      <h2 class="step-title">Search for local shows</h2>
+      <p class="step-help">
+        Start typing your city and state (e.g. “Austin, TX”), choose a date, and we’ll pull small venue music events from Ticketmaster.
+      </p>
+
+      <div class="form-grid two">
+        <!-- City + State with suggestions -->
+        <div class="field suggest full">
+          <label for="locationInput">City &amp; State</label>
           <input
             type="text"
-            id="cityInput"
-            placeholder="e.g. Austin"
-            required
+            id="locationInput"
+            placeholder="Start typing a city, e.g. Austin, TX"
+            autocomplete="off"
           />
+          <div id="locationSuggestions" class="suggest-list" hidden></div>
+          <p class="tiny">
+            Powered by Ticketmaster venues. Pick a suggestion for best results.
+          </p>
         </div>
 
-        <div class="field-group">
-          <label for="stateInput">State (2-letter)</label>
+        <!-- Date -->
+        <div class="field">
+          <label for="dateInput">Date</label>
           <input
-            type="text"
-            id="stateInput"
-            placeholder="e.g. TX"
-            maxlength="2"
-            required
+            type="date"
+            id="dateInput"
           />
+          <p class="tiny">
+            Leave empty to see upcoming shows; choose a date to narrow it down.
+          </p>
         </div>
+      </div>
 
-        <div class="field-group checkbox-group">
-          <input
-            type="checkbox"
-            id="smallOnly"
-            checked
-          />
-          <label for="smallOnly">Small venues only (bars, clubs, lounges)</label>
-        </div>
-
-        <button type="submit" class="btn-primary">Find Shows</button>
-      </form>
-
-      <div id="status" class="status"></div>
+      <div class="search-actions">
+        <button type="button" id="searchBtn" class="btn-cta">
+          Find Shows
+        </button>
+        <div id="status" class="status muted"></div>
+      </div>
     </section>
 
-    <section>
-      <h2 class="results-title">Results</h2>
-      <div id="events" class="events-grid"></div>
-    </section>
-  </main>
+    <!-- Results -->
+    <section class="results-section">
+      <div class="results-header">
+        <div>
+          <h2>Results</h2>
+          <p id="resultsSummary" class="muted">
+            Enter a city &amp; state to see what’s playing nearby.
+          </p>
+        </div>
+      </div>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>Event data provided by Ticketmaster.</p>
-    </div>
-  </footer>
+      <div id="events" class="events-list"></div>
+    </section>
+
+    <footer class="page-foot muted">
+      Event data provided by Ticketmaster.
+    </footer>
+  </div>
 
   <script src="main.js"></script>
 </body>
