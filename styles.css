@@ -1,7 +1,5 @@
 /* ============================================================
-   Concerto — Events Near Me
-   Global font: Inter
-   Headline (EVENTS NEAR ME): Cormorant Garamond, all caps
+   Concerto — Events Near Me (Clean Inter Version)
    ============================================================ */
 
 :root {
@@ -35,7 +33,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== Layout ===== */
+/* ===== Layout Shell ===== */
 .page {
   min-height: 100vh;
   display: flex;
@@ -43,7 +41,7 @@ body {
 }
 
 .page-header {
-  padding: 24px 0 12px;
+  padding: 16px 0 8px;
 }
 
 .page-header-inner,
@@ -54,63 +52,62 @@ body {
 }
 
 .page-main {
-  padding-bottom: 24px;
+  padding-bottom: 20px;
 }
 
 .page-footer {
   margin-top: auto;
-  padding-bottom: 18px;
+  padding-bottom: 14px;
   font-size: 0.85rem;
   text-align: center;
 }
 
-/* ===== Branding ===== */
+/* ===== Branding & Top Hero ===== */
 .brand-logo {
   max-width: 260px;
   width: 72%;
   display: block;
-  margin: 0 auto 18px;
+  margin: 0 auto 10px;
 }
 
-/* EVENTS NEAR ME — match CONCERTO logo style */
+/* Main feature headline: EVENTS NEAR ME */
 .feature-title {
-  margin: 0 0 6px;
-  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  text-transform: uppercase;
+  margin: 0 0 4px;
+  font-size: 1.45rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
-  font-weight: 500;             /* close to the logo weight */
-  font-size: 1.5rem;
+  text-transform: uppercase;
   text-align: center;
-  color: var(--ink);
 }
 
-/* Subtitle under headline */
+/* Short hero copy under Events Near Me */
 .tagline {
-  margin: 0 0 26px;
+  margin: 0 0 14px;
   text-align: center;
   font-size: 0.92rem;
+  line-height: 1.45;
   color: var(--muted);
-  line-height: 1.5;
 }
 
-/* ===== Section Titles + Copy ===== */
+/* ===== Typography for sections ===== */
 .section-title {
+  margin: 0 0 4px;
   font-size: 0.9rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 10px;
 }
 
 .section-help {
-  margin: 0 0 18px;
+  margin: 0 0 12px;
   font-size: 0.9rem;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--muted);
 }
 
 .muted {
   color: var(--muted);
+  font-size: 0.85rem;
 }
 
 /* ===== Card ===== */
@@ -118,30 +115,34 @@ body {
   background: var(--card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
-  padding: 22px 18px 26px;
-  margin-top: 20px;
+  padding: 16px 16px 18px;
+  margin-top: 12px;
 }
 
 /* ===== Form ===== */
 .field {
   display: flex;
   flex-direction: column;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
 }
 
 label {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
-/* City & State + Date pills side by side (desktop) */
+/* City & State + Date pills */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 12px;
 }
 
 .form-grid > .field {
@@ -154,23 +155,22 @@ label {
   }
 }
 
-/* Inputs styled as pills */
+/* Input pills */
 input[type="text"],
 input[type="date"] {
   width: 100%;
   border-radius: 999px;
   border: 1px solid var(--line);
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 0.95rem;
   font-size: 15px;
-  min-height: 46px;
+  min-height: 42px;
   background: #fff;
   color: var(--ink);
   outline: none;
-  transition: border-color 0.16s, box-shadow 0.16s;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Normalize date on iOS */
 input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
@@ -179,7 +179,7 @@ input[type="date"] {
 
 input::placeholder {
   color: #9aa3b5;
-  font-size: 0.9rem; /* slightly smaller placeholder text */
+  font-size: 0.9rem;
 }
 
 input:focus {
@@ -188,8 +188,8 @@ input:focus {
 }
 
 .tiny {
-  margin-top: 6px;
-  font-size: 0.8rem;
+  margin-top: 4px;
+  font-size: 0.82rem;
   color: var(--muted);
 }
 
@@ -197,20 +197,21 @@ input:focus {
 .pill-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 
 .pill {
   border-radius: 999px;
-  padding: 8px 16px;
+  padding: 7px 14px;
   border: 1px solid var(--line);
   background: #fff;
-  color: var(--ink);
   font-size: 0.9rem;
+  color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.12s,
-    box-shadow 0.12s;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .pill:hover {
@@ -224,20 +225,25 @@ input:focus {
   color: #fff;
 }
 
-/* ===== More Filters toggle ===== */
+/* ===== More Filters Toggle ===== */
 .link-toggle {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent-2);
+  font-size: 0.88rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.9rem;
-  color: var(--accent-2);
-  margin-top: 8px;
-  margin-bottom: 6px;
   cursor: pointer;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .filter-icon {
   font-size: 0.9rem;
+  opacity: 0.8;
 }
 
 .filter-caret {
@@ -250,14 +256,14 @@ input:focus {
   transform: rotate(180deg);
 }
 
-/* Filters panel */
+/* Filters panel (collapsed by default) */
 .filters-panel {
-  margin-top: 12px;
-  padding-top: 14px;
+  margin-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   font-size: 0.88rem;
 }
 
@@ -268,7 +274,7 @@ input:focus {
 .filters-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .filters-block-title {
@@ -279,7 +285,7 @@ input:focus {
   color: var(--muted);
 }
 
-/* Only show active filter set for chosen category */
+/* Only show active set for category */
 .category-filters {
   display: none;
 }
@@ -294,88 +300,99 @@ input:focus {
   border: none;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  padding: 1rem 1.2rem;
-  font-size: 1rem;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.96rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 10px 20px rgba(18, 30, 54, 0.18);
-  margin-top: 20px;
+  box-shadow: 0 8px 18px rgba(18, 30, 54, 0.16);
+  margin-top: 14px;
   -webkit-tap-highlight-color: transparent;
 }
 
 /* ===== Results ===== */
 .results {
-  margin-top: 32px;
+  margin-top: 20px;
 }
 
 .results-header {
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .results-summary {
+  margin: 0;
   font-size: 0.88rem;
   color: var(--muted);
 }
 
-/* Event list */
 .events-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
-/* Event card */
+/* ===== Event Card ===== */
 .event-card {
   background: #fff;
   border-radius: 14px;
   border: 1px solid var(--line);
-  padding: 16px 18px;
+  padding: 14px 16px;
   box-shadow: 0 2px 8px rgba(18, 30, 54, 0.06);
 }
 
 .event-title {
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   font-size: 1rem;
   font-weight: 600;
 }
 
-.event-meta,
-.event-address {
-  font-size: 0.88rem;
+.event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.86rem;
   color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.event-address {
+  font-size: 0.86rem;
   margin-bottom: 6px;
 }
 
 .event-footer {
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
-/* Tickets / Info button (tap-friendly) */
+/* Tickets / Info button */
 .event-ticket-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.55rem 1.3rem;
-  min-width: 150px;
+  padding: 0.5rem 1.2rem;
   border-radius: 999px;
   border: none;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   text-decoration: none;
   box-shadow: 0 6px 14px rgba(18, 30, 54, 0.18);
+  min-width: 150px;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ===== Mobile tweaks ===== */
+/* ===== Mobile Tweaks ===== */
 @media (max-width: 600px) {
   .card {
-    padding: 20px 16px 24px;
+    padding: 14px 14px 16px;
+  }
+
+  .feature-title {
+    font-size: 1.4rem;
   }
 
   .btn-primary {
-    font-size: 0.96rem;
+    font-size: 0.94rem;
   }
 }
