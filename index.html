@@ -8,8 +8,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -25,7 +24,7 @@
         />
         <h1 class="feature-title">Events Near Me</h1>
         <p class="tagline">
-          Discover Concerts, Sports, Comedy, Festivals, and Theater Around You.
+          Discover Concerts, Sports, Comedy, Festivals, Theater, Nightlife, and Family Fun Around You.
         </p>
       </div>
     </header>
@@ -63,7 +62,7 @@
                 id="dateInput"
               />
               <p class="tiny">
-                Leave Blank to See Upcoming Events.
+                Leave blank to see upcoming events.
               </p>
             </div>
           </div>
@@ -77,6 +76,8 @@
               <button type="button" class="pill" data-cat="comedy">Comedy</button>
               <button type="button" class="pill" data-cat="festivals">Festivals</button>
               <button type="button" class="pill" data-cat="theater">Theater</button>
+              <button type="button" class="pill" data-cat="nightlife">Nightlife</button>
+              <button type="button" class="pill" data-cat="family">Family + Kids</button>
             </div>
           </div>
 
@@ -107,8 +108,14 @@
 
               <div class="sub-label">Venue type</div>
               <div class="pill-row" id="musicVenueFilters">
-                <button type="button" class="pill" data-small-venues="true">
-                  Small Venues Only (Bars &amp; Clubs)
+                <button type="button" class="pill" data-venue-size="small">
+                  Bars &amp; Clubs
+                </button>
+                <button type="button" class="pill" data-venue-size="mid">
+                  Theaters &amp; Music Halls
+                </button>
+                <button type="button" class="pill" data-venue-size="big">
+                  Arenas &amp; Stadiums
                 </button>
               </div>
             </div>
@@ -165,6 +172,31 @@
                 <button type="button" class="pill" data-theater="musical">Musicals</button>
                 <button type="button" class="pill" data-theater="play">Plays</button>
                 <button type="button" class="pill" data-theater="family">Family-friendly</button>
+              </div>
+            </div>
+
+            <!-- Nightlife -->
+            <div class="filters-block category-filters" data-category="nightlife">
+              <div class="filters-block-title">Nightlife filters</div>
+              <div class="sub-label">Type</div>
+              <div class="pill-row" id="nightlifeTypeFilters">
+                <button type="button" class="pill" data-nightlife="bars">Bars &amp; lounges</button>
+                <button type="button" class="pill" data-nightlife="clubs">Clubs &amp; DJs</button>
+                <button type="button" class="pill" data-nightlife="livemusicbars">Live music bars</button>
+                <button type="button" class="pill" data-nightlife="rooftop">Rooftops &amp; views</button>
+                <button type="button" class="pill" data-nightlife="latenight">Late night</button>
+              </div>
+            </div>
+
+            <!-- Family + Kids -->
+            <div class="filters-block category-filters" data-category="family">
+              <div class="filters-block-title">Family + kids filters</div>
+              <div class="sub-label">Type</div>
+              <div class="pill-row" id="familyTypeFilters">
+                <button type="button" class="pill" data-family="familyshows">Family shows</button>
+                <button type="button" class="pill" data-family="kidsactivities">Kids activities</button>
+                <button type="button" class="pill" data-family="fairs">Fairs &amp; festivals</button>
+                <button type="button" class="pill" data-family="sports">Family sports &amp; games</button>
               </div>
             </div>
           </div>
