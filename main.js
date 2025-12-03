@@ -774,18 +774,20 @@ function renderEvents(events) {
         ${addressLine && cityStateZip ? "<br>" : ""}
         ${escapeHtml(cityStateZip)}
       </div>
-                  <div class="event-footer">
+      <div class="event-footer">
         ${
           url
-            ? `<a class="event-ticket-btn" href="${url}">
+            ? `<a
+                 class="event-ticket-btn"
+                 href="${url}"
+                 data-url="${url}"
+               >
                  Tickets / Info
                </a>`
             : ""
         }
       </div>
     `;
-
-    // ❌ NO click listeners, NO window.open, NO buildfire navigation here.
 
     eventsContainer.appendChild(card);
   });
@@ -902,3 +904,19 @@ dateInput.addEventListener("keydown", (e) => {
 
 // Init correct filters block
 updateCategoryFiltersVisibility();
+
+// ===== BuildFire-aware Tickets / Info handler =====
+if (window.buildfire && buildfire.navigation && buildfire.navigation.openWindow) {
+  eventsContainer.addEventListener("click", (e) => {
+    const link = e.target.closest(".event-ticket-btn");
+    if (!link) return;
+
+    e.preventDefault();
+
+    const url = link.getAttribute("data-url") || link.href;
+    if (!url) return;
+
+    // Open in external/system browser so Ticketmaster isn't stuck in Webview
+    buildfire.navigation.openWindow(url, "_system");
+  });
+}
