@@ -1,5 +1,6 @@
 /* ============================================================
-   Concerto — Events Near Me (Clean Inter Version, no bold heads)
+   Concerto — Events Near Me (Ultra-Clean Inter Version)
+   Visual polish only (no functional/radius changes)
    ============================================================ */
 
 :root {
@@ -74,7 +75,7 @@ body {
 .feature-title {
   margin: 0 0 4px;
   font-size: 1.45rem;
-  font-weight: 400;                 /* not bold */
+  font-weight: 400;                /* not bold */
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-align: center;
@@ -82,7 +83,7 @@ body {
 
 /* Short hero copy under Events Near Me */
 .tagline {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   text-align: center;
   font-size: 0.92rem;
   line-height: 1.45;
@@ -93,7 +94,7 @@ body {
 .section-title {
   margin: 0 0 4px;
   font-size: 0.9rem;
-  font-weight: 400;                 /* not bold */
+  font-weight: 400;                /* not bold */
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -110,13 +111,14 @@ body {
   font-size: 0.85rem;
 }
 
-/* ===== Card ===== */
+/* ===== “Card” – visually de-carded ===== */
+/* We keep the wrapper but remove the boxy look */
 .card {
-  background: var(--card);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-soft);
-  padding: 16px 16px 18px;
-  margin-top: 12px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 10px;
 }
 
 /* ===== Form ===== */
@@ -193,7 +195,8 @@ input:focus {
   color: var(--muted);
 }
 
-/* ===== City/State Suggestions Dropdown ===== */
+/* ===== Location Suggestions (City/State dropdown) ===== */
+
 .suggest {
   position: relative;
 }
@@ -203,14 +206,15 @@ input:focus {
   left: 0;
   right: 0;
   top: 100%;
-  margin-top: 6px;                 /* space between pill + list */
+  margin-top: 6px;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-soft);
-  max-height: 240px;
+  box-shadow: 0 6px 18px rgba(18, 30, 54, 0.12);
+  max-height: 260px;
   overflow-y: auto;
-  z-index: 30;
+  z-index: 20;
+  padding: 4px 0;
 }
 
 .suggest-list[hidden] {
@@ -218,11 +222,11 @@ input:focus {
 }
 
 .suggest-item {
-  padding: 10px 14px;              /* more vertical space */
+  padding: 10px 12px;
   font-size: 0.9rem;
-  line-height: 1.4;
   cursor: pointer;
-  border-bottom: 1px solid #EEF2F8;/* subtle divider */
+  line-height: 1.4;
+  border-bottom: 1px solid #f2f4f8;
 }
 
 .suggest-item:last-child {
@@ -230,7 +234,7 @@ input:focus {
 }
 
 .suggest-item:hover {
-  background: #F4F7FC;
+  background: #f5f7fb;
 }
 
 /* ===== Category Pills (Live Music, Sports, etc.) ===== */
@@ -267,7 +271,7 @@ input:focus {
 
 /* ===== More Filters Toggle ===== */
 .link-toggle {
-  margin: 0;
+  margin: 4px 0;
   padding: 0;
   border: none;
   background: none;
@@ -277,8 +281,6 @@ input:focus {
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  margin-top: 4px;
-  margin-bottom: 4px;
 }
 
 .filter-icon {
@@ -426,11 +428,11 @@ input:focus {
 /* ===== Mobile Tweaks ===== */
 @media (max-width: 600px) {
   .card {
-    padding: 14px 14px 16px;
+    padding: 0;
   }
 
   .feature-title {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
   }
 
   .btn-primary {
