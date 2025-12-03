@@ -1,6 +1,6 @@
 // main.js
 
-const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- put your real Ticketmaster key here
+const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- Ticketmaster key
 
 const EVENTS_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
 const VENUES_URL = "https://app.ticketmaster.com/discovery/v2/venues.json";
@@ -26,12 +26,14 @@ const sportsLevelGroup = document.getElementById("sportsLevelFilters");
 const comedyTypeGroup = document.getElementById("comedyTypeFilters");
 const festivalTypeGroup = document.getElementById("festivalTypeFilters");
 const theaterTypeGroup = document.getElementById("theaterTypeFilters");
+const nightlifeTypeGroup = document.getElementById("nightlifeTypeFilters");
+const familyTypeGroup = document.getElementById("familyTypeFilters");
 
-// State
-let selectedCategory = "music"; // "music" | "sports" | "comedy" | "festivals" | "theater"
+// ===== State =====
+let selectedCategory = "music"; // "music" | "sports" | "comedy" | "festivals" | "theater" | "nightlife" | "family"
 
 const selectedMusicGenres = new Set();
-let smallVenuesOnly = false;
+let selectedMusicVenueSize = "any"; // "any" | "small" | "mid" | "big"
 
 const selectedSports = new Set();
 let selectedSportsLevel = "any";
@@ -39,6 +41,8 @@ let selectedSportsLevel = "any";
 const selectedComedyTypes = new Set();
 const selectedFestivalTypes = new Set();
 const selectedTheaterTypes = new Set();
+const selectedNightlifeTypes = new Set();
+const selectedFamilyTypes = new Set();
 
 const CATEGORY_LABELS = {
   music: "live music",
@@ -46,9 +50,11 @@ const CATEGORY_LABELS = {
   comedy: "comedy",
   festivals: "festivals",
   theater: "theater",
+  nightlife: "nightlife",
+  family: "family & kids",
 };
 
-// Keyword maps
+// ===== Keyword maps =====
 const GENRE_KEYWORDS = {
   pop: ["pop"],
   rock: ["rock"],
@@ -91,6 +97,54 @@ const THEATER_KEYWORDS = {
   play: ["play", "drama"],
   family: ["family", "kids", "children"],
 };
+
+// Nightlife: blend of text + venue names
+const NIGHTLIFE_KEYWORDS = {
+  bars: ["bar", "pub", "tavern", "saloon", "taproom", "lounge"],
+  clubs: ["club", "nightclub", "dj", "discotheque"],
+  livemusicbars: ["live music", "music hall", "bar", "club", "lounge"],
+  rooftop: ["rooftop", "roof", "sky bar"],
+  latenight: ["late night", "after party", "afterparty"],
+};
+
+// Family + kids
+const FAMILY_KEYWORDS = {
+  familyshows: ["family", "kids", "children", "all ages", "family-friendly", "family friendly"],
+  kidsactivities: ["kids", "children", "family fun", "family activity", "kid zone"],
+  fairs: ["fair", "carnival", "festival", "fun day"],
+  sports: ["youth", "little league", "family day", "kids day"],
+};
+
+// Shared venue name heuristics
+const SMALL_VENUE_KEYWORDS = [
+  "bar",
+  "pub",
+  "club",
+  "lounge",
+  "tavern",
+  "saloon",
+  "grill",
+  "taproom",
+  "brewing",
+  "brewery",
+  "cafe",
+  "café",
+  "music hall",
+];
+
+const BIG_VENUE_KEYWORDS = [
+  "stadium",
+  "arena",
+  "center",
+  "centre",
+  "coliseum",
+  "ampitheatre",
+  "amphitheatre",
+  "amphitheater",
+  "ballpark",
+  "field",
+  "pavilion",
+];
 
 // ===== Helpers =====
 function escapeHtml(str) {
@@ -151,40 +205,25 @@ function isSmallVenueEvent(event) {
 
   const name = venue.name.toLowerCase();
 
-  const smallKeywords = [
-    "bar",
-    "pub",
-    "club",
-    "lounge",
-    "tavern",
-    "saloon",
-    "grill",
-    "taproom",
-    "brewing",
-    "brewery",
-    "cafe",
-    "caf\u00e9",
-    "music hall",
-  ];
-
-  const bigVenueKeywords = [
-    "stadium",
-    "arena",
-    "center",
-    "centre",
-    "coliseum",
-    "ampitheatre",
-    "amphitheatre",
-    "amphitheater",
-    "ballpark",
-    "field",
-    "pavilion",
-  ];
-
-  const hasSmall = smallKeywords.some((k) => name.includes(k));
-  const hasBig = bigVenueKeywords.some((k) => name.includes(k));
+  const hasSmall = SMALL_VENUE_KEYWORDS.some((k) => name.includes(k));
+  const hasBig = BIG_VENUE_KEYWORDS.some((k) => name.includes(k));
 
   return hasSmall && !hasBig;
+}
+
+// Coarse venue size tag: "small" | "big" | "mid"
+function getVenueSizeTag(event) {
+  const venue =
+    event._embedded &&
+    event._embedded.venues &&
+    event._embedded.venues[0];
+
+  if (!venue || !venue.name) return "mid";
+  const name = venue.name.toLowerCase();
+
+  if (SMALL_VENUE_KEYWORDS.some((k) => name.includes(k))) return "small";
+  if (BIG_VENUE_KEYWORDS.some((k) => name.includes(k))) return "big";
+  return "mid";
 }
 
 // Debounce utility
@@ -196,13 +235,22 @@ function debounce(fn, delay = 350) {
   };
 }
 
-// Collect searchable text from event
-function getEventTextBlob(event) {
+// Collect searchable text from event (plus venue name optionally)
+function getEventTextBlob(event, includeVenue = false) {
   const chunks = [];
   if (event.name) chunks.push(event.name);
   if (event.info) chunks.push(event.info);
   if (event.description) chunks.push(event.description);
   if (event.pleaseNote) chunks.push(event.pleaseNote);
+
+  if (includeVenue) {
+    const venue =
+      event._embedded &&
+      event._embedded.venues &&
+      event._embedded.venues[0];
+    if (venue && venue.name) chunks.push(venue.name);
+  }
+
   const joined = chunks.join(" | ");
   return joined.toLowerCase();
 }
@@ -230,6 +278,12 @@ function getCategoryParams(category) {
       return { keyword: "festival" };
     case "theater":
       return { segmentName: "Arts & Theatre" };
+    case "nightlife":
+      // Use Music segment, then filter down with nightlife heuristics
+      return { segmentName: "Music" };
+    case "family":
+      // No segment filter: pull a mix, then filter by family/kids keywords
+      return {};
     case "music":
     default:
       return { segmentName: "Music" };
@@ -398,15 +452,19 @@ if (musicGenreGroup) {
   });
 }
 
-// Live music: small venues only (toggle)
+// Live music: venue size (single-select: small / mid / big)
 if (musicVenueGroup) {
   musicVenueGroup.addEventListener("click", (e) => {
     const pill = e.target.closest(".pill");
     if (!pill) return;
-    if (!pill.dataset.smallVenues) return;
+    const size = pill.dataset.venueSize;
+    if (!size) return;
 
-    smallVenuesOnly = !smallVenuesOnly;
-    pill.classList.toggle("active", smallVenuesOnly);
+    selectedMusicVenueSize = size;
+
+    Array.from(musicVenueGroup.querySelectorAll(".pill")).forEach((p) =>
+      p.classList.toggle("active", p === pill)
+    );
   });
 }
 
@@ -499,6 +557,42 @@ if (theaterTypeGroup) {
   });
 }
 
+// Nightlife: type (multi-select)
+if (nightlifeTypeGroup) {
+  nightlifeTypeGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.nightlife;
+    if (!val) return;
+
+    if (selectedNightlifeTypes.has(val)) {
+      selectedNightlifeTypes.delete(val);
+      pill.classList.remove("active");
+    } else {
+      selectedNightlifeTypes.add(val);
+      pill.classList.add("active");
+    }
+  });
+}
+
+// Family + kids: type (multi-select)
+if (familyTypeGroup) {
+  familyTypeGroup.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (!pill) return;
+    const val = pill.dataset.family;
+    if (!val) return;
+
+    if (selectedFamilyTypes.has(val)) {
+      selectedFamilyTypes.delete(val);
+      pill.classList.remove("active");
+    } else {
+      selectedFamilyTypes.add(val);
+      pill.classList.add("active");
+    }
+  });
+}
+
 // ===== Fetch events (no date in API call; date is filtered client-side) =====
 async function fetchEvents(city, stateCode, category) {
   const baseParams = {
@@ -585,6 +679,12 @@ function matchesMusicGenre(event) {
   return false;
 }
 
+function matchesMusicVenueSize(event) {
+  if (selectedMusicVenueSize === "any") return true;
+  const tag = getVenueSizeTag(event);
+  return tag === selectedMusicVenueSize;
+}
+
 function matchesSportType(event) {
   if (selectedSports.size === 0) return true;
   const text = getEventTextBlob(event);
@@ -667,13 +767,35 @@ function matchesTheaterType(event) {
   return matched;
 }
 
+function matchesNightlifeType(event) {
+  if (selectedNightlifeTypes.size === 0) return true;
+  const text = getEventTextBlob(event, true);
+
+  for (const [key, arr] of Object.entries(NIGHTLIFE_KEYWORDS)) {
+    if (!selectedNightlifeTypes.has(key)) continue;
+    const any = arr.some((kw) => text.includes(kw));
+    if (any) return true;
+  }
+  return false;
+}
+
+function matchesFamilyType(event) {
+  if (selectedFamilyTypes.size === 0) return true;
+  const text = getEventTextBlob(event, true);
+
+  for (const [key, arr] of Object.entries(FAMILY_KEYWORDS)) {
+    if (!selectedFamilyTypes.has(key)) continue;
+    const any = arr.some((kw) => text.includes(kw));
+    if (any) return true;
+  }
+  return false;
+}
+
 function applyMusicFilters(events) {
   let out = events;
   if (!events.length) return out;
   out = out.filter(matchesMusicGenre);
-  if (smallVenuesOnly) {
-    out = out.filter(isSmallVenueEvent);
-  }
+  out = out.filter(matchesMusicVenueSize);
   return out;
 }
 
@@ -703,6 +825,20 @@ function applyTheaterFilters(events) {
   let out = events;
   if (!events.length) return out;
   out = out.filter(matchesTheaterType);
+  return out;
+}
+
+function applyNightlifeFilters(events) {
+  let out = events;
+  if (!events.length) return out;
+  out = out.filter(matchesNightlifeType);
+  return out;
+}
+
+function applyFamilyFilters(events) {
+  let out = events;
+  if (!events.length) return out;
+  out = out.filter(matchesFamilyType);
   return out;
 }
 
@@ -756,8 +892,6 @@ function renderEvents(events) {
     ]
       .filter(Boolean)
       .join(" ");
-
-    // ----- LINKS -----
 
     // 1) Where → venue website (if available)
     const venueWebsite = venue?.url || "";
@@ -881,6 +1015,12 @@ async function handleSearch() {
         break;
       case "theater":
         filtered = applyTheaterFilters(filtered);
+        break;
+      case "nightlife":
+        filtered = applyNightlifeFilters(filtered);
+        break;
+      case "family":
+        filtered = applyFamilyFilters(filtered);
         break;
       default:
         break;
