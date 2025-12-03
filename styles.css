@@ -193,6 +193,46 @@ input:focus {
   color: var(--muted);
 }
 
+/* ===== City/State Suggestions Dropdown ===== */
+.suggest {
+  position: relative;
+}
+
+.suggest-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 6px;                 /* space between pill + list */
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 30;
+}
+
+.suggest-list[hidden] {
+  display: none;
+}
+
+.suggest-item {
+  padding: 10px 14px;              /* more vertical space */
+  font-size: 0.9rem;
+  line-height: 1.4;
+  cursor: pointer;
+  border-bottom: 1px solid #EEF2F8;/* subtle divider */
+}
+
+.suggest-item:last-child {
+  border-bottom: none;
+}
+
+.suggest-item:hover {
+  background: #F4F7FC;
+}
+
 /* ===== Category Pills (Live Music, Sports, etc.) ===== */
 .pill-row {
   display: flex;
