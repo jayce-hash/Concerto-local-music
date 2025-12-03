@@ -50,7 +50,7 @@ a:hover {
 }
 
 .page-header {
-  padding: 12px 0 4px;
+  padding: 10px 0 2px;
 }
 
 .page-header-inner {
@@ -87,7 +87,7 @@ a:hover {
   font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-weight: 600;
+  font-weight: 500;        /* was 600 */
   font-size: 1.32rem;
   color: var(--ink);
   text-align: center;
@@ -109,7 +109,7 @@ a:hover {
   font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-weight: 600;
+  font-weight: 500;        /* was 600 */
   font-size: 0.9rem;
   color: var(--ink);
 }
@@ -138,7 +138,7 @@ a:hover {
   font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-weight: 600;
+  font-weight: 500;        /* was 600 */
   font-size: 0.9rem;
   color: var(--ink);
 }
@@ -180,7 +180,7 @@ label {
   font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-weight: 600;
+  font-weight: 500;        /* was 600 */
   font-size: 0.84rem;
   margin: 0;
   color: var(--ink);
@@ -188,17 +188,17 @@ label {
 
 /* top of form: Find Events, help text, then first field */
 .search-card .section-title {
-  margin-bottom: 2px;
+  margin-bottom: 1px;  /* tighter */
 }
 .search-card .section-help {
-  margin-bottom: 6px;
+  margin-bottom: 4px;  /* tighter */
 }
 
 /* Make City and Date pills same width */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;             /* was 8px */
 }
 
 /* allow children to shrink evenly so the date control can't stretch the grid */
@@ -209,7 +209,7 @@ label {
 @media (max-width: 600px) {
   .form-grid {
     grid-template-columns: 1fr; /* stacked on phones */
-    gap: 8px;
+    gap: 6px;
   }
 }
 
@@ -221,7 +221,7 @@ input[type="date"] {
   border-radius: 999px;
   border: 1px solid var(--line);
   padding: 0.45rem 0.85rem;
-  font-size: 15px; /* slightly smaller so it doesn’t feel chunky */
+  font-size: 15px;
   min-height: 40px;
   line-height: 1.2;
   background: #fff;
@@ -250,7 +250,7 @@ input[type="date"]::-webkit-datetime-edit-year-field {
 /* smaller placeholder inside City & State pill */
 input::placeholder {
   color: #9aa3b5;
-  font-size: 0.85rem; /* smaller "eg Chicago, IL" text */
+  font-size: 0.85rem;
 }
 
 input:focus {
@@ -300,7 +300,7 @@ input:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 4px; /* consistent spacing after "What are you looking for?" */
+  margin-top: 2px; /* slightly closer to heading */
 }
 
 .pill {
@@ -384,7 +384,7 @@ input:focus {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 500;       /* was 600 */
 }
 
 .sub-label {
@@ -412,7 +412,7 @@ input:focus {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
   font-family: inherit;
-  font-weight: 600;
+  font-weight: 500;       /* was 600 */
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-size: 0.82rem;
@@ -429,7 +429,7 @@ input:focus {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-top: 10px; /* consistent spacing after pills / filters */
+  margin-top: 8px;     /* slightly tighter */
 }
 
 .btn-primary:hover {
@@ -448,14 +448,14 @@ input:focus {
 
 /* ===== Results ===== */
 .results {
-  margin-top: 14px;
+  margin-top: 12px;     /* a bit closer to form */
 }
 
 .results-header {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .results-summary {
@@ -482,7 +482,7 @@ input:focus {
   margin: 0 0 3px;
   font-family: inherit;
   font-size: 0.96rem;
-  font-weight: 600;
+  font-weight: 500;      /* soften here too */
   color: var(--ink);
 }
 
