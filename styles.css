@@ -439,3 +439,32 @@ input:focus {
     font-size: 0.94rem;
   }
 }
+
+.event-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-size: 0.86rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.event-meta-line {
+  width: 100%;
+}
+
+.event-address {
+  font-size: 0.86rem;
+  margin-bottom: 6px;
+}
+
+/* Make venue links look like normal text but tappable */
+.venue-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.venue-link:hover {
+  text-decoration: underline; /* optional – you can remove if you want zero change on hover */
+}
