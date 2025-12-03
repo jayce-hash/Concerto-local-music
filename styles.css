@@ -1,5 +1,5 @@
 /* ============================================================
-   Concerto — Events Near Me (Clean Inter Version)
+   Concerto — Events Near Me (Clean Inter Version, no bold heads)
    ============================================================ */
 
 :root {
@@ -74,7 +74,7 @@ body {
 .feature-title {
   margin: 0 0 4px;
   font-size: 1.45rem;
-  font-weight: 600;
+  font-weight: 400;                 /* not bold */
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-align: center;
@@ -93,7 +93,7 @@ body {
 .section-title {
   margin: 0 0 4px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;                 /* not bold */
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -132,7 +132,7 @@ body {
 
 label {
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 400;                 /* not bold */
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-bottom: 4px;
@@ -256,7 +256,7 @@ input:focus {
   transform: rotate(180deg);
 }
 
-/* Filters panel (collapsed by default) */
+/* Filters panel */
 .filters-panel {
   margin-top: 8px;
   padding-top: 10px;
@@ -279,7 +279,7 @@ input:focus {
 
 .filters-block-title {
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 400;                /* not bold */
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
@@ -302,7 +302,7 @@ input:focus {
   color: #fff;
   padding: 0.85rem 1.1rem;
   font-size: 0.96rem;
-  font-weight: 600;
+  font-weight: 600;                /* CTA can stay stronger */
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
@@ -326,6 +326,7 @@ input:focus {
   color: var(--muted);
 }
 
+/* Event list */
 .events-list {
   display: flex;
   flex-direction: column;
@@ -344,7 +345,7 @@ input:focus {
 .event-title {
   margin: 0 0 4px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;                /* not bold */
 }
 
 .event-meta {
