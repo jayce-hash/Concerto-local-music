@@ -760,36 +760,71 @@ function renderEvents(events) {
       .filter(Boolean)
       .join(" ");
 
+    // Build a Maps URL from the address
+    let mapsUrl = "";
+    if (addressLine || cityStateZip) {
+      const fullAddress = `${addressLine} ${cityStateZip}`.trim();
+      if (fullAddress) {
+        mapsUrl =
+          "https://www.google.com/maps/search/?api=1&query=" +
+          encodeURIComponent(fullAddress);
+      }
+    }
+
+    // Prefer venue website if present
+    const venueWebsite = venue && venue.url ? venue.url : "";
+    const venueLink = venueWebsite || mapsUrl; // website first, then Maps
+
     const card = document.createElement("article");
     card.className = "event-card";
 
     card.innerHTML = `
       <h3 class="event-title">${escapeHtml(eventName)}</h3>
+
       <div class="event-meta">
-        <span><strong>When</strong> ${escapeHtml(displayDate)}</span>
-        <span><strong>Where</strong> ${escapeHtml(venueName)}</span>
+        <div class="event-meta-line">
+          <strong>When</strong> ${escapeHtml(displayDate)}
+        </div>
+        <div class="event-meta-line">
+          <strong>Where</strong>
+          ${
+            venueLink
+              ? ` <a class="venue-link" href="${venueLink}">
+                    ${escapeHtml(venueName)}
+                  </a>`
+              : ` ${escapeHtml(venueName)}`
+          }
+        </div>
       </div>
+
       <div class="event-address">
-        ${escapeHtml(addressLine)}
-        ${addressLine && cityStateZip ? "<br>" : ""}
-        ${escapeHtml(cityStateZip)}
+        ${
+          venueLink
+            ? `<a class="venue-link" href="${venueLink}">
+                 ${escapeHtml(addressLine)}
+                 ${addressLine && cityStateZip ? "<br>" : ""}
+                 ${escapeHtml(cityStateZip)}
+               </a>`
+            : `
+               ${escapeHtml(addressLine)}
+               ${addressLine && cityStateZip ? "<br>" : ""}
+               ${escapeHtml(cityStateZip)}
+              `
+        }
       </div>
-   <div class="event-footer">
-  ${
-    url
-      ? `<a
-           class="event-ticket-btn"
-           href="${url}"
-           target="_blank"
-           rel="noopener noreferrer"
-         >
-           Tickets / Info
-         </a>`
-      : ""
-  }
-</div>
+
+      <div class="event-footer">
+        ${
+          url
+            ? `<a class="event-ticket-btn" href="${url}">
+                 Tickets / Info
+               </a>`
+            : ""
+        }
+      </div>
     `;
 
+    // no extra click listeners – just plain links for BuildFire
     eventsContainer.appendChild(card);
   });
 }
