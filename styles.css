@@ -1,9 +1,8 @@
 /* ============================================================
-   Concerto — Events Near Me (Final CSS)
-   Font: Inter (applied globally)
+   Concerto — Events Near Me (Restored Spacing Version)
+   Font: Inter (global)
    ============================================================ */
 
-/* ----- Core Theme ----- */
 :root {
   --bg: #F8F9F9;
   --ink: #121E36;
@@ -16,7 +15,7 @@
   --radius-card: 16px;
 }
 
-/* ----- Reset ----- */
+/* Reset */
 *,
 *::before,
 *::after {
@@ -26,22 +25,13 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: var(--accent-2);
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
-
-/* ----- Layout Containers ----- */
+/* Layout */
 .page {
   min-height: 100vh;
   display: flex;
@@ -49,7 +39,7 @@ a:hover {
 }
 
 .page-header {
-  padding: 18px 0 8px;
+  padding: 24px 0 12px; /* restored */
 }
 
 .page-header-inner,
@@ -61,82 +51,80 @@ a:hover {
 
 .page-footer {
   margin-top: auto;
-  padding-bottom: 16px;
+  padding-bottom: 20px;
   font-size: 0.85rem;
   text-align: center;
 }
 
-/* ----- Branding ----- */
+/* Branding */
 .brand-logo {
   max-width: 260px;
   width: 72%;
   display: block;
-  margin: 0 auto 14px;
+  margin: 0 auto 20px; /* restored */
 }
 
-/* Main headline under logo */
 .feature-title {
-  margin: 0 0 4px;
-  font-size: 1.28rem;
+  margin: 0 0 8px; /* restored */
+  font-size: 1.32rem;
   font-weight: 500;
   text-align: center;
-  color: var(--ink);
 }
 
-/* Subheadline */
 .tagline {
-  margin: 0 0 20px;
+  margin: 0 0 26px; /* restored */
   text-align: center;
   font-size: 0.92rem;
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
-/* ----- Section Titles + Body Text ----- */
+/* Typography */
 .section-title {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: 10px; /* restored */
 }
 
 .section-help {
-  margin: 0 0 14px;
-  font-size: 0.88rem;
-  line-height: 1.45;
+  margin: 0 0 18px; /* restored */
+  font-size: 0.9rem;
+  line-height: 1.55;
   color: var(--muted);
 }
 
-/* ----- Card Container ----- */
+/* Card */
 .card {
   background: var(--card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
-  padding: 18px 16px 20px;
-  margin-top: 14px;
+  padding: 22px 18px 26px; /* restored */
+  margin-top: 20px;        /* restored */
 }
 
-/* ----- Form ----- */
+/* Form */
 .field {
   display: flex;
   flex-direction: column;
+  margin-bottom: 18px; /* restored */
 }
 
 label {
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
-/* Pills for city/date alignment */
+/* pill layout */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 18px; /* restored */
 }
+
 .form-grid > .field {
   min-width: 0;
 }
@@ -147,60 +135,42 @@ label {
   }
 }
 
-/* Inputs */
 input[type="text"],
 input[type="date"] {
   width: 100%;
   border-radius: 999px;
   border: 1px solid var(--line);
-  padding: 0.65rem 1rem;
+  padding: 0.75rem 1rem; /* restored - taller */
   font-size: 15px;
-  min-height: 44px;
+  min-height: 46px; /* restored height */
   background: #fff;
   color: var(--ink);
   outline: none;
-  transition: border-color 0.16s, box-shadow 0.16s;
-  -webkit-tap-highlight-color: transparent;
 }
 
-/* Fix iOS date element weirdness */
+/* Fix iOS date */
 input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
   text-align: left;
 }
 
-input::placeholder {
-  color: #9AA3B5;
-}
-
-input:focus {
-  border-color: var(--accent-2);
-  box-shadow: 0 0 0 2px rgba(31, 43, 74, 0.18);
-}
-
-.tiny {
-  margin-top: 6px;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-/* ----- Category Pills (Live Music, Sports, etc.) ----- */
+/* Pills (categories) */
 .pill-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px; /* restored */
+  margin-bottom: 10px; /* restored */
 }
 
 .pill {
   border-radius: 999px;
-  padding: 7px 14px;
-  font-size: 0.86rem;
+  padding: 8px 16px; /* restored larger pill */
   border: 1px solid var(--line);
   background: #fff;
   color: var(--ink);
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: 0.15s ease;
 }
 
 .pill.active {
@@ -209,143 +179,105 @@ input:focus {
   color: #fff;
 }
 
-/* ----- “More Filters” Toggle ----- */
+/* More Filters */
 .link-toggle {
-  font-size: 0.86rem;
-  color: var(--accent-2);
   display: inline-flex;
   gap: 6px;
+  font-size: 0.9rem;
+  color: var(--accent-2);
+  margin-top: 8px; /* restored */
+  margin-bottom: 6px;
   cursor: pointer;
-  margin-top: 2px;
 }
 
 .filter-caret {
-  transition: transform 0.18s ease;
-  opacity: 0.7;
+  transition: 0.18s ease;
 }
 
 .link-toggle.open .filter-caret {
   transform: rotate(180deg);
 }
 
-/* Filters Panel */
 .filters-panel {
-  margin-top: 8px;
-  padding-top: 12px;
+  margin-top: 12px; /* restored */
+  padding-top: 14px;
   border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  font-size: 0.88rem;
+  gap: 16px; /* restored */
 }
+
 .filters-panel[hidden] {
   display: none;
 }
 
-.filters-block-title {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-/* Only show the active category */
-.category-filters {
-  display: none;
-}
-.category-filters.active {
-  display: flex;
-}
-
-/* ----- Primary Button ----- */
+/* Primary button */
 .btn-primary {
   width: 100%;
-  border: none;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: white;
-  padding: 0.85rem 1rem;
-  font-size: 0.96rem;
+  color: #fff;
+  padding: 1rem 1.2rem; /* restored */
+  font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
+  border: none;
+  margin-top: 20px; /* restored */
   cursor: pointer;
-  box-shadow: 0 8px 18px rgba(18,30,54,0.16);
-  transition: 0.15s ease;
+  box-shadow: 0 10px 20px rgba(18,30,54,0.18);
 }
 
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 22px rgba(18,30,54,0.20);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 16px rgba(18,30,54,0.14);
-}
-
-/* ----- Results ----- */
+/* Results */
 .results {
-  margin-top: 28px;
+  margin-top: 32px; /* restored */
 }
 
 .results-header {
-  margin-bottom: 6px;
+  margin-bottom: 12px; /* restored */
 }
 
-.results-summary {
-  font-size: 0.86rem;
-  color: var(--muted);
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* restored */
 }
 
-/* Event Card */
+/* Event card */
 .event-card {
-  background: #fff;
+  padding: 16px 18px; /* restored */
   border-radius: 14px;
-  border: 1px solid var(--line);
-  padding: 14px 16px;
   box-shadow: 0 2px 8px rgba(18,30,54,0.06);
+  border: 1px solid var(--line);
 }
 
 .event-title {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-size: 1rem;
   font-weight: 600;
 }
 
 .event-meta,
 .event-address {
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   color: var(--muted);
-  margin-bottom: 4px;
+  margin-bottom: 6px; /* restored */
 }
 
 .event-footer {
-  margin-top: 8px;
+  margin-top: 10px; /* restored */
 }
 
-/* Ticket Button */
+/* Tickets button — tap-friendly */
 .event-ticket-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1.2rem;
+  padding: 0.55rem 1.3rem; /* restored */
+  min-width: 150px;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  font-size: 0.86rem;
   text-decoration: none;
+  font-size: 0.9rem;
   box-shadow: 0 6px 14px rgba(18,30,54,0.18);
-  transition: 0.15s ease;
-}
-
-.event-ticket-btn:hover {
-  transform: translateY(-1px);
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .event-ticket-btn {
-    min-width: 150px;
-  }
 }
