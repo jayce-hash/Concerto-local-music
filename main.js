@@ -715,6 +715,9 @@ function renderEvents(events) {
     return;
   }
 
+  // Detect iOS for Apple Maps
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
   events.forEach((event) => {
     const venue =
       event._embedded &&
@@ -722,18 +725,17 @@ function renderEvents(events) {
       event._embedded.venues[0];
 
     const eventName = event.name || "Untitled event";
-    const url = event.url || "";
+    const ticketUrl = event.url || "";
 
-    // Date/time
+    // Date/time formatting
     let displayDate = "Date TBA";
-    if (event.dates && event.dates.start) {
+    if (event.dates?.start) {
       const { dateTime, localDate, localTime } = event.dates.start;
       const raw =
-        dateTime ||
-        (localDate && `${localDate}T${localTime || "00:00:00"}`);
+        dateTime || (localDate && `${localDate}T${localTime || "00:00:00"}`);
       if (raw) {
         const d = new Date(raw);
-        if (!isNaN(d.getTime())) {
+        if (!isNaN(d)) {
           displayDate = d.toLocaleString(undefined, {
             weekday: "short",
             month: "short",
@@ -745,35 +747,28 @@ function renderEvents(events) {
       }
     }
 
-    const venueName = venue && venue.name ? venue.name : "Venue TBA";
-
-    const addressLine =
-      venue && venue.address && venue.address.line1
-        ? venue.address.line1
-        : "";
-
+    const venueName = venue?.name || "Venue TBA";
+    const addressLine = venue?.address?.line1 || "";
     const cityStateZip = [
-      venue && venue.city && venue.city.name,
-      venue && venue.state && venue.state.stateCode,
-      venue && venue.postalCode,
+      venue?.city?.name,
+      venue?.state?.stateCode,
+      venue?.postalCode,
     ]
       .filter(Boolean)
       .join(" ");
 
-    // Build a Maps URL from the address
-    let mapsUrl = "";
-    if (addressLine || cityStateZip) {
-      const fullAddress = `${addressLine} ${cityStateZip}`.trim();
-      if (fullAddress) {
-        mapsUrl =
-          "https://www.google.com/maps/search/?api=1&query=" +
-          encodeURIComponent(fullAddress);
-      }
-    }
+    // ----- LINKS -----
 
-    // Prefer venue website if present
-    const venueWebsite = venue && venue.url ? venue.url : "";
-    const venueLink = venueWebsite || mapsUrl; // website first, then Maps
+    // 1) Where → venue website (if available)
+    const venueWebsite = venue?.url || "";
+
+    // 2) Address → Apple Maps (iOS) or Google Maps (others)
+    const fullAddress = `${addressLine} ${cityStateZip}`.trim();
+    const mapUrl = fullAddress
+      ? isIOS
+        ? `https://maps.apple.com/?q=${encodeURIComponent(fullAddress)}`
+        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
+      : "";
 
     const card = document.createElement("article");
     card.className = "event-card";
@@ -782,14 +777,13 @@ function renderEvents(events) {
       <h3 class="event-title">${escapeHtml(eventName)}</h3>
 
       <div class="event-meta">
-        <div class="event-meta-line">
-          <strong>When</strong> ${escapeHtml(displayDate)}
-        </div>
-        <div class="event-meta-line">
+        <div><strong>When</strong> ${escapeHtml(displayDate)}</div>
+
+        <div>
           <strong>Where</strong>
           ${
-            venueLink
-              ? ` <a class="venue-link" href="${venueLink}">
+            venueWebsite
+              ? ` <a class="venue-link" href="${venueWebsite}">
                     ${escapeHtml(venueName)}
                   </a>`
               : ` ${escapeHtml(venueName)}`
@@ -799,15 +793,13 @@ function renderEvents(events) {
 
       <div class="event-address">
         ${
-          venueLink
-            ? `<a class="venue-link" href="${venueLink}">
-                 ${escapeHtml(addressLine)}
-                 ${addressLine && cityStateZip ? "<br>" : ""}
+          mapUrl
+            ? `<a class="venue-link" href="${mapUrl}">
+                 ${escapeHtml(addressLine)}${addressLine && cityStateZip ? "<br>" : ""}
                  ${escapeHtml(cityStateZip)}
                </a>`
             : `
-               ${escapeHtml(addressLine)}
-               ${addressLine && cityStateZip ? "<br>" : ""}
+               ${escapeHtml(addressLine)}${addressLine && cityStateZip ? "<br>" : ""}
                ${escapeHtml(cityStateZip)}
               `
         }
@@ -815,8 +807,8 @@ function renderEvents(events) {
 
       <div class="event-footer">
         ${
-          url
-            ? `<a class="event-ticket-btn" href="${url}">
+          ticketUrl
+            ? `<a class="event-ticket-btn" href="${ticketUrl}">
                  Tickets / Info
                </a>`
             : ""
@@ -824,7 +816,6 @@ function renderEvents(events) {
       </div>
     `;
 
-    // no extra click listeners – just plain links for BuildFire
     eventsContainer.appendChild(card);
   });
 }
