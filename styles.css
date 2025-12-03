@@ -1,4 +1,9 @@
-/* ===== Core Theme (Concerto) ===== */
+/* ============================================================
+   Concerto — Events Near Me (Final CSS)
+   Font: Inter (applied globally)
+   ============================================================ */
+
+/* ----- Core Theme ----- */
 :root {
   --bg: #F8F9F9;
   --ink: #121E36;
@@ -11,25 +16,19 @@
   --radius-card: 16px;
 }
 
-/* ===== Reset ===== */
+/* ----- Reset ----- */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
-}
-
-body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-    sans-serif;
-  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
   background: var(--bg);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -42,7 +41,7 @@ a:hover {
   text-decoration: underline;
 }
 
-/* ===== Layout Shell ===== */
+/* ----- Layout Containers ----- */
 .page {
   min-height: 100vh;
   display: flex;
@@ -50,207 +49,129 @@ a:hover {
 }
 
 .page-header {
-  padding: 10px 0 2px;
+  padding: 18px 0 8px;
 }
 
-.page-header-inner {
+.page-header-inner,
+.page-main,
+.page-footer {
   width: min(640px, 92vw);
   margin: 0 auto;
-  text-align: center;
-}
-
-.page-main {
-  width: min(640px, 92vw);
-  margin: 0 auto;
-  padding-bottom: 16px;
 }
 
 .page-footer {
-  width: min(640px, 92vw);
-  margin: auto auto 8px;
+  margin-top: auto;
+  padding-bottom: 16px;
   font-size: 0.85rem;
   text-align: center;
 }
 
-/* ===== Branding ===== */
+/* ----- Branding ----- */
 .brand-logo {
-  max-width: 240px;
-  width: 68%;
-  height: auto;
+  max-width: 260px;
+  width: 72%;
   display: block;
-  margin: 0 auto 6px;
+  margin: 0 auto 14px;
 }
 
-/* Main feature title: EVENTS NEAR ME */
+/* Main headline under logo */
 .feature-title {
   margin: 0 0 4px;
-  font-family: inherit;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 500;        /* was 600 */
-  font-size: 1.32rem;
-  color: var(--ink);
+  font-size: 1.28rem;
+  font-weight: 500;
   text-align: center;
+  color: var(--ink);
 }
 
-/* Subtitle under logo */
+/* Subheadline */
 .tagline {
-  margin: 0;
-  font-family: inherit;
-  font-size: 0.86rem;
+  margin: 0 0 20px;
+  text-align: center;
+  font-size: 0.92rem;
   color: var(--muted);
+  line-height: 1.45;
 }
 
-/* ===== Typography ===== */
-
-/* Section headings: Find Events, Results, etc. */
+/* ----- Section Titles + Body Text ----- */
 .section-title {
-  margin: 0 0 3px;
-  font-family: inherit;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 500;        /* was 600 */
-  font-size: 0.9rem;
-  color: var(--ink);
-}
-
-/* Helper / body text blocks */
-.section-help,
-.tiny,
-.results-summary,
-.event-meta,
-.event-address,
-.status,
-.filters-panel,
-.suggest-item {
-  font-family: inherit;
   font-size: 0.88rem;
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-.muted {
-  color: var(--muted);
-}
-
-/* Optional Results heading label */
-.results-header-label {
-  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 500;        /* was 600 */
-  font-size: 0.9rem;
-  color: var(--ink);
+  margin-bottom: 4px;
 }
 
-/* ===== Utility ===== */
-.stack {
-  display: flex;
-  flex-direction: column;
-}
-.gap-16 {
-  gap: 16px;
-}
-.gap-6 {
-  gap: 6px;
+.section-help {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
-/* ===== Card ===== */
+/* ----- Card Container ----- */
 .card {
   background: var(--card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
-  padding: 12px 12px 14px;
+  padding: 18px 16px 20px;
+  margin-top: 14px;
 }
 
-.search-card {
-  margin-top: 10px;
-}
-
-/* ===== Form ===== */
-
+/* ----- Form ----- */
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px; /* consistent label → control spacing */
 }
 
-/* Form labels: City & State, Date, etc. */
 label {
-  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 500;        /* was 600 */
-  font-size: 0.84rem;
-  margin: 0;
-  color: var(--ink);
+  margin-bottom: 5px;
 }
 
-/* top of form: Find Events, help text, then first field */
-.search-card .section-title {
-  margin-bottom: 1px;  /* tighter */
-}
-.search-card .section-help {
-  margin-bottom: 4px;  /* tighter */
-}
-
-/* Make City and Date pills same width */
+/* Pills for city/date alignment */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;             /* was 8px */
+  gap: 12px;
 }
-
-/* allow children to shrink evenly so the date control can't stretch the grid */
 .form-grid > .field {
   min-width: 0;
 }
 
 @media (max-width: 600px) {
   .form-grid {
-    grid-template-columns: 1fr; /* stacked on phones */
-    gap: 6px;
+    grid-template-columns: 1fr;
   }
 }
 
-/* Text + Date inputs styled as pills */
+/* Inputs */
 input[type="text"],
 input[type="date"] {
   width: 100%;
-  box-sizing: border-box;
   border-radius: 999px;
   border: 1px solid var(--line);
-  padding: 0.45rem 0.85rem;
+  padding: 0.65rem 1rem;
   font-size: 15px;
-  min-height: 40px;
-  line-height: 1.2;
+  min-height: 44px;
   background: #fff;
   color: var(--ink);
   outline: none;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  transition: border-color 0.16s, box-shadow 0.16s;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* normalize date field */
+/* Fix iOS date element weirdness */
 input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
   text-align: left;
 }
 
-/* iOS inner date text box */
-input[type="date"]::-webkit-datetime-edit,
-input[type="date"]::-webkit-datetime-edit-text,
-input[type="date"]::-webkit-datetime-edit-month-field,
-input[type="date"]::-webkit-datetime-edit-day-field,
-input[type="date"]::-webkit-datetime-edit-year-field {
-  padding: 0;
-}
-
-/* smaller placeholder inside City & State pill */
 input::placeholder {
-  color: #9aa3b5;
-  font-size: 0.85rem;
+  color: #9AA3B5;
 }
 
 input:focus {
@@ -259,141 +180,77 @@ input:focus {
 }
 
 .tiny {
-  margin: 3px 0 0;
-  font-size: 0.78rem;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 
-/* ===== Suggestions (City/State) ===== */
-.suggest {
-  position: relative;
-}
-
-.suggest-list {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  margin-top: 4px;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-soft);
-  max-height: 220px;
-  overflow-y: auto;
-  z-index: 20;
-}
-
-.suggest-list[hidden] {
-  display: none;
-}
-
-.suggest-item {
-  padding: 8px 10px;
-  cursor: pointer;
-}
-.suggest-item:hover {
-  background: #f1f4fa;
-}
-
-/* ===== Pills (category options) ===== */
+/* ----- Category Pills (Live Music, Sports, etc.) ----- */
 .pill-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 2px; /* slightly closer to heading */
+  gap: 10px;
 }
 
 .pill {
   border-radius: 999px;
-  padding: 5px 11px;
+  padding: 7px 14px;
+  font-size: 0.86rem;
   border: 1px solid var(--line);
   background: #fff;
-  font-family: inherit;
-  font-size: 0.8rem;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease,
-    transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.pill:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-soft);
+  transition: 0.15s ease;
 }
 
 .pill.active {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #fff;
   border-color: transparent;
+  color: #fff;
 }
 
-/* ===== More Filters Toggle ===== */
+/* ----- “More Filters” Toggle ----- */
 .link-toggle {
-  margin: 2px 0 0;
-  padding: 0;
-  border: none;
-  background: none;
+  font-size: 0.86rem;
   color: var(--accent-2);
-  font-size: 0.82rem;
   display: inline-flex;
-  align-items: center;
   gap: 6px;
   cursor: pointer;
-}
-
-.filter-icon {
-  font-size: 0.8rem;
-  opacity: 0.75;
+  margin-top: 2px;
 }
 
 .filter-caret {
-  font-size: 0.7rem;
-  opacity: 0.7;
   transition: transform 0.18s ease;
+  opacity: 0.7;
 }
 
 .link-toggle.open .filter-caret {
   transform: rotate(180deg);
 }
 
-/* ===== Filters Panel ===== */
+/* Filters Panel */
 .filters-panel {
-  margin-top: 6px;
-  padding-top: 8px;
+  margin-top: 8px;
+  padding-top: 12px;
   border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 0.84rem;
+  gap: 12px;
+  font-size: 0.88rem;
 }
-
 .filters-panel[hidden] {
   display: none;
 }
 
-.filters-block {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* Block titles inside More Filters */
 .filters-block-title {
-  font-family: inherit;
   font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
   color: var(--muted);
-  font-weight: 500;       /* was 600 */
 }
 
-.sub-label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-/* show only active category */
+/* Only show the active category */
 .category-filters {
   display: none;
 }
@@ -401,174 +258,94 @@ input:focus {
   display: flex;
 }
 
-/* ===== Primary Button ===== */
+/* ----- Primary Button ----- */
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 1.3rem;
-  border-radius: 999px;
+  width: 100%;
   border: none;
+  border-radius: 999px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #fff;
-  font-family: inherit;
-  font-weight: 500;       /* was 600 */
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.82rem;
+  color: white;
+  padding: 0.85rem 1rem;
+  font-size: 0.96rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   cursor: pointer;
-  box-shadow: 0 8px 18px rgba(18, 30, 54, 0.18);
-  transition: transform 0.12s ease, box-shadow 0.16s ease;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-/* Search actions row (Find Events button + status) */
-.search-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;     /* slightly tighter */
+  box-shadow: 0 8px 18px rgba(18,30,54,0.16);
+  transition: 0.15s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(18, 30, 54, 0.22);
+  box-shadow: 0 12px 22px rgba(18,30,54,0.20);
 }
 
 .btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(18, 30, 54, 0.16);
+  box-shadow: 0 6px 16px rgba(18,30,54,0.14);
 }
 
-.status {
-  font-size: 0.78rem;
-}
-
-/* ===== Results ===== */
+/* ----- Results ----- */
 .results {
-  margin-top: 12px;     /* a bit closer to form */
+  margin-top: 28px;
 }
 
 .results-header {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
   margin-bottom: 6px;
 }
 
 .results-summary {
   font-size: 0.86rem;
+  color: var(--muted);
 }
 
-.events-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Event card */
+/* Event Card */
 .event-card {
   background: #fff;
   border-radius: 14px;
   border: 1px solid var(--line);
-  padding: 10px 12px 11px;
-  box-shadow: 0 2px 6px rgba(18, 30, 54, 0.06);
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(18,30,54,0.06);
 }
 
-/* Event title */
 .event-title {
-  margin: 0 0 3px;
-  font-family: inherit;
-  font-size: 0.96rem;
-  font-weight: 500;      /* soften here too */
-  color: var(--ink);
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
-.event-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: 0.82rem;
-  color: var(--muted);
-  margin-bottom: 3px;
-}
-
+.event-meta,
 .event-address {
-  font-size: 0.82rem;
-  margin-bottom: 5px;
+  font-size: 0.86rem;
+  color: var(--muted);
+  margin-bottom: 4px;
 }
 
 .event-footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+  margin-top: 8px;
 }
 
-/* Tickets / Info pill (mobile-tap friendly) */
+/* Ticket Button */
 .event-ticket-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem 1rem;
+  padding: 0.5rem 1.2rem;
   border-radius: 999px;
-  border: none;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  font-size: 0.82rem;
-  font-family: inherit;
+  font-size: 0.86rem;
   text-decoration: none;
-  box-shadow: 0 6px 14px rgba(18, 30, 54, 0.18);
-  cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.16s ease;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  box-shadow: 0 6px 14px rgba(18,30,54,0.18);
+  transition: 0.15s ease;
 }
 
 .event-ticket-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(18, 30, 54, 0.22);
 }
 
-.event-ticket-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(18, 30, 54, 0.18);
-}
-
-/* ===== Spinner ===== */
-.spinner {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 2px solid var(--line);
-  border-top-color: var(--accent);
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ===== Mobile Tweaks ===== */
+/* Mobile */
 @media (max-width: 600px) {
-  .card {
-    padding: 12px 12px 14px;
-  }
-
-  .btn-primary {
-    width: 100%;
-  }
-
-  .search-actions {
-    align-items: flex-start;
-  }
-
-  /* Make Tickets/Info easy to tap on phones */
   .event-ticket-btn {
-    min-width: 130px;
+    min-width: 150px;
   }
 }
