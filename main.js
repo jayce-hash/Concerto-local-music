@@ -1,6 +1,6 @@
 // main.js
 
-const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- your Ticketmaster key
+const API_KEY = "vSyw9gaQsyn8SqMXctOzWZsGJDGt29tB"; // <-- put your real Ticketmaster key here
 
 const EVENTS_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
 const VENUES_URL = "https://app.ticketmaster.com/discovery/v2/venues.json";
@@ -105,10 +105,7 @@ function escapeHtml(str) {
 // Parse "City, ST"
 function parseCityState(input) {
   if (!input) return null;
-  const parts = input
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
+  const parts = input.split(",").map((p) => p.trim()).filter(Boolean);
   if (parts.length < 2) return null;
   const state = parts[parts.length - 1].toUpperCase();
   const city = parts.slice(0, parts.length - 1).join(", ");
@@ -237,65 +234,6 @@ function getCategoryParams(category) {
     default:
       return { segmentName: "Music" };
   }
-}
-
-// ===== Drive-time based radius per category =====
-function getRadiusForCategory(category) {
-  switch (category) {
-    case "sports":
-      return 45; // ~1 hour drive
-    case "festivals":
-      return 100; // ~2 hour drive
-    case "music":
-    case "comedy":
-    case "theater":
-      return 20; // ~30 minute drive
-    default:
-      return 25; // fallback
-  }
-}
-
-// ===== Compute lat/long for city/state via Ticketmaster venues =====
-async function getLatLongForCityState(city, stateCode) {
-  const params = new URLSearchParams({
-    apikey: API_KEY,
-    city,
-    stateCode,
-    countryCode: "US",
-    size: "50",
-  });
-
-  const url = `${VENUES_URL}?${params.toString()}`;
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    console.warn("Venue lookup failed for lat/long:", res.status);
-    return null;
-  }
-
-  const data = await res.json();
-  if (!data._embedded || !data._embedded.venues) return null;
-
-  const coords = data._embedded.venues
-    .map((v) => v.location)
-    .filter((loc) => loc && loc.latitude && loc.longitude)
-    .map((loc) => ({
-      lat: parseFloat(loc.latitude),
-      lng: parseFloat(loc.longitude),
-    }))
-    .filter((c) => !isNaN(c.lat) && !isNaN(c.lng));
-
-  if (!coords.length) return null;
-
-  // Average lat/long across venues to represent the city
-  const sum = coords.reduce(
-    (acc, c) => ({ lat: acc.lat + c.lat, lng: acc.lng + c.lng }),
-    { lat: 0, lng: 0 }
-  );
-  return {
-    lat: sum.lat / coords.length,
-    lng: sum.lng / coords.length,
-  };
 }
 
 // ===== Location suggestions (Ticketmaster venues → city/state only) =====
@@ -561,36 +499,18 @@ if (theaterTypeGroup) {
   });
 }
 
-// ===== Fetch events (date filtered client-side, radius by category) =====
+// ===== Fetch events (no date in API call; date is filtered client-side) =====
 async function fetchEvents(city, stateCode, category) {
-  const radius = getRadiusForCategory(category);
-
-  // Try to derive lat/long using Ticketmaster venues
-  let latlong = null;
-  try {
-    latlong = await getLatLongForCityState(city, stateCode);
-  } catch (err) {
-    console.warn("Failed to get lat/long for city; falling back to city/state search:", err);
-  }
-
   const baseParams = {
     apikey: API_KEY,
+    city,
+    stateCode,
     countryCode: "US",
     size: "100",
     sort: "date,asc",
   };
 
   Object.assign(baseParams, getCategoryParams(category));
-
-  if (latlong) {
-    baseParams.latlong = `${latlong.lat},${latlong.lng}`;
-    baseParams.radius = String(radius);
-    baseParams.unit = "miles";
-  } else {
-    // fallback if we can't compute coordinates
-    baseParams.city = city;
-    baseParams.stateCode = stateCode;
-  }
 
   const params = new URLSearchParams(baseParams);
   const url = `${EVENTS_URL}?${params.toString()}`;
@@ -854,7 +774,7 @@ function renderEvents(events) {
         ${addressLine && cityStateZip ? "<br>" : ""}
         ${escapeHtml(cityStateZip)}
       </div>
-      <div class="event-footer">
+                  <div class="event-footer">
         ${
           url
             ? `<a class="event-ticket-btn" href="${url}">
@@ -865,7 +785,7 @@ function renderEvents(events) {
       </div>
     `;
 
-    // NOTE: plain <a> tag so BuildFire/WebView handles navigation natively.
+    // ❌ NO click listeners, NO window.open, NO buildfire navigation here.
 
     eventsContainer.appendChild(card);
   });
@@ -879,8 +799,7 @@ async function handleSearch() {
   const parsed = parseCityState(rawLocation);
 
   if (!parsed) {
-    statusEl.textContent =
-      "Please enter a city and 2-letter state (e.g. Austin, TX).";
+    statusEl.textContent = "Please enter a city and 2-letter state (e.g. Austin, TX).";
     return;
   }
 
@@ -960,8 +879,7 @@ async function handleSearch() {
   } catch (err) {
     console.error("🔥 Error loading events:", err);
     statusEl.textContent =
-      err.message ||
-      "We couldn't load events right now. Please try again in a moment.";
+      err.message || "We couldn't load events right now. Please try again in a moment.";
     resultsSummary.textContent = "Error loading events from Ticketmaster.";
   }
 }
