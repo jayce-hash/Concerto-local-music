@@ -468,3 +468,177 @@ input:focus {
 .venue-link:hover {
   text-decoration: underline; /* optional – you can remove if you want zero change on hover */
 }
+
+/* ============================================================
+   PATCH — Festivals/Concerto+ header + ghost button + modal
+   Paste at END of current styles.css
+   (No changes to your existing pills/cards logic)
+   ============================================================ */
+
+/* Festivals-style header treatment */
+.page-header{
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 2px 8px rgba(18,30,54,.04);
+  padding: 10px 0 14px;
+}
+
+.page-header-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap: 6px;
+}
+
+/* Bigger, closer to Festivals */
+.brand-logo{
+  max-width: 320px;
+  width: 86%;
+  display:block;
+  height:auto;
+  margin: 0 auto;
+}
+
+/* Optional small “Concerto” kicker above title */
+.brand-kicker{
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Make headline feel like Festivals (still uppercase) */
+.feature-title{
+  margin: 2px 0 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-align:center;
+}
+
+/* Slightly tighter and cleaner */
+.tagline{
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.45;
+  max-width: 38ch;
+}
+
+/* Header actions row */
+.header-actions{ margin-top: 6px; }
+
+/* Festivals-style ghost button */
+.btn-ghost{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  padding:10px 14px;
+  font-size: 14px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  box-shadow: 0 3px 12px rgba(18,30,54,.10);
+  text-decoration:none;
+}
+
+.btn-ghost:hover{ background:#F5F7FB; }
+
+/* Smaller ghost button version (Filters) */
+.btn-ghost--small{
+  padding:9px 12px;
+  font-size: 13px;
+}
+
+/* Row wrapper for the Filters ghost button */
+.filters-toggle-row{
+  display:flex;
+  justify-content:flex-start;
+}
+
+/* Keep your filter icon consistent */
+.btn-ghost .filter-icon{
+  font-size: 14px;
+  opacity: .85;
+}
+
+/* Modal (matches Festivals) */
+.modal[hidden]{ display:none; }
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:80;
+  display:grid;
+  place-items:center;
+}
+
+.modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(18,30,54,.35);
+}
+
+.modal-card{
+  position:relative;
+  width:min(520px, calc(100% - 26px));
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow: 0 10px 30px rgba(18,30,54,.10);
+  padding:18px;
+}
+
+.modal-title{
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+
+.modal-body{
+  color: var(--muted);
+  margin-top:10px;
+  line-height:1.45;
+  font-size: 14px;
+}
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:14px;
+}
+
+.bullets{ margin:0; padding-left:18px; }
+.bullets li{ margin:8px 0; }
+
+/* “Got it” button (Festivals primary) */
+.primary-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  padding:10px 14px;
+  font-size: 13px;
+  border:1px solid var(--accent);
+  cursor:pointer;
+  background: var(--accent);
+  color:#fff;
+  box-shadow: 0 3px 12px rgba(18,30,54,.10);
+}
+
+/* Tiny spacing polish so Search area breathes */
+.page-main{
+  padding-top: 10px;
+}
+
+/* Mobile: match Festivals logo scaling */
+@media (max-width: 520px){
+  .brand-logo{ width: 92%; max-width: 340px; }
+  .feature-title{ font-size: 24px; }
+}
