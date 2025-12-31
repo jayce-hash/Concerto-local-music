@@ -5,34 +5,45 @@
   <title>Events Near Me</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
-  <!-- Fonts -->
+  <!-- Fonts (Festivals/Concerto+ aligned) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="page">
+
+    <!-- Header (Festivals/Concerto+ vibe) -->
     <header class="page-header">
       <div class="page-header-inner">
-        <!-- Logo – update src path/filename to match your repo -->
         <img
           src="IMG_3180.jpeg"
           alt="Concerto - From the Concert to the City"
           class="brand-logo"
         />
+
+        <div class="brand-kicker">Concerto</div>
         <h1 class="feature-title">Events Near Me</h1>
+
         <p class="tagline">
           Discover Concerts, Sports, Comedy, Festivals, Theater, Nightlife, and Family Fun Around You.
         </p>
+
+        <div class="header-actions">
+          <a class="btn-ghost" href="#" id="openHelp">How it works</a>
+        </div>
       </div>
     </header>
 
     <main class="page-main">
-      <!-- Search Card -->
+
+      <!-- Search / Controls -->
       <section class="card search-card">
         <div class="stack gap-16">
+
           <div class="stack gap-6">
             <h2 class="section-title">Find events</h2>
             <p class="section-help">
@@ -57,13 +68,8 @@
             <!-- Date -->
             <div class="field">
               <label for="dateInput">Date</label>
-              <input
-                type="date"
-                id="dateInput"
-              />
-              <p class="tiny">
-                Leave blank to see upcoming events.
-              </p>
+              <input type="date" id="dateInput" />
+              <p class="tiny">Leave blank to see upcoming events.</p>
             </div>
           </div>
 
@@ -81,14 +87,17 @@
             </div>
           </div>
 
-          <!-- More filters toggle -->
-          <button type="button" id="toggleFilters" class="link-toggle">
-            <span class="filter-icon">☰</span>
-            <span>Filters</span>
-          </button>
+          <!-- Filters toggle (styled like Festivals ghost button) -->
+          <div class="filters-toggle-row">
+            <button type="button" id="toggleFilters" class="btn-ghost btn-ghost--small">
+              <span class="filter-icon">☰</span>
+              <span>Filters</span>
+            </button>
+          </div>
 
-          <!-- More Filters Panel -->
+          <!-- Filters Panel -->
           <div id="moreFilters" class="filters-panel" hidden>
+
             <!-- Live Music -->
             <div class="filters-block category-filters active" data-category="music">
               <div class="filters-block-title">Live music filters</div>
@@ -108,15 +117,9 @@
 
               <div class="sub-label">Venue type</div>
               <div class="pill-row" id="musicVenueFilters">
-                <button type="button" class="pill" data-venue-size="small">
-                  Bars &amp; Clubs
-                </button>
-                <button type="button" class="pill" data-venue-size="mid">
-                  Theaters &amp; Music Halls
-                </button>
-                <button type="button" class="pill" data-venue-size="big">
-                  Arenas &amp; Stadiums
-                </button>
+                <button type="button" class="pill" data-venue-size="small">Bars &amp; Clubs</button>
+                <button type="button" class="pill" data-venue-size="mid">Theaters &amp; Music Halls</button>
+                <button type="button" class="pill" data-venue-size="big">Arenas &amp; Stadiums</button>
               </div>
             </div>
 
@@ -145,6 +148,7 @@
             <!-- Comedy -->
             <div class="filters-block category-filters" data-category="comedy">
               <div class="filters-block-title">Comedy filters</div>
+
               <div class="sub-label">Type</div>
               <div class="pill-row" id="comedyTypeFilters">
                 <button type="button" class="pill" data-comedy="standup">Stand-up</button>
@@ -156,6 +160,7 @@
             <!-- Festivals -->
             <div class="filters-block category-filters" data-category="festivals">
               <div class="filters-block-title">Festival filters</div>
+
               <div class="sub-label">Type</div>
               <div class="pill-row" id="festivalTypeFilters">
                 <button type="button" class="pill" data-fest="music">Music festivals</button>
@@ -167,6 +172,7 @@
             <!-- Theater -->
             <div class="filters-block category-filters" data-category="theater">
               <div class="filters-block-title">Theater filters</div>
+
               <div class="sub-label">Type</div>
               <div class="pill-row" id="theaterTypeFilters">
                 <button type="button" class="pill" data-theater="musical">Musicals</button>
@@ -178,6 +184,7 @@
             <!-- Nightlife -->
             <div class="filters-block category-filters" data-category="nightlife">
               <div class="filters-block-title">Nightlife filters</div>
+
               <div class="sub-label">Type</div>
               <div class="pill-row" id="nightlifeTypeFilters">
                 <button type="button" class="pill" data-nightlife="bars">Bars &amp; lounges</button>
@@ -191,6 +198,7 @@
             <!-- Family + Kids -->
             <div class="filters-block category-filters" data-category="family">
               <div class="filters-block-title">Family + kids filters</div>
+
               <div class="sub-label">Type</div>
               <div class="pill-row" id="familyTypeFilters">
                 <button type="button" class="pill" data-family="familyshows">Family shows</button>
@@ -199,15 +207,15 @@
                 <button type="button" class="pill" data-family="sports">Family sports &amp; games</button>
               </div>
             </div>
+
           </div>
 
           <!-- Search button + status -->
           <div class="search-actions">
-            <button type="button" id="searchBtn" class="btn-primary">
-              Search
-            </button>
+            <button type="button" id="searchBtn" class="btn-primary">Search</button>
             <div id="status" class="status muted"></div>
           </div>
+
         </div>
       </section>
 
@@ -223,9 +231,53 @@
         <div id="events" class="events-list"></div>
       </section>
     </main>
+  </div>
 
+  <!-- How it works modal (no main.js changes required) -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-backdrop" id="modalClose"></div>
+    <div class="modal-card">
+      <div class="modal-title">How Events Near Me Works</div>
+      <div class="modal-body">
+        <ul class="bullets">
+          <li>Enter a City &amp; State (or pick a suggestion).</li>
+          <li>Pick a category like Nightlife or Family + Kids.</li>
+          <li>Optional: use Filters to narrow down results.</li>
+          <li>Tap Tickets / Info to open Ticketmaster.</li>
+        </ul>
+      </div>
+      <div class="modal-actions">
+        <button class="primary-btn" id="modalOk">Got it</button>
+      </div>
+    </div>
   </div>
 
   <script src="main.js"></script>
+
+  <!-- tiny modal script -->
+  <script>
+    (function () {
+      const openBtn = document.getElementById("openHelp");
+      const modal = document.getElementById("modal");
+      const closeBg = document.getElementById("modalClose");
+      const okBtn = document.getElementById("modalOk");
+
+      if (!openBtn || !modal || !closeBg || !okBtn) return;
+
+      function openModal(e){
+        if (e) e.preventDefault();
+        modal.hidden = false;
+      }
+      function closeModal(){ modal.hidden = true; }
+
+      openBtn.addEventListener("click", openModal);
+      closeBg.addEventListener("click", closeModal);
+      okBtn.addEventListener("click", closeModal);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modal.hidden) closeModal();
+      });
+    })();
+  </script>
 </body>
 </html>
