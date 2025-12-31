@@ -75,7 +75,7 @@ body {
 .feature-title {
   margin: 0 0 4px;
   font-size: 28px;      /* match your Festivals/Concerto+ scale */
-  font-weight: 500;     /* ✅ less bold (try 500 first) */
+  font-weight: 400;     /* ✅ less bold (try 500 first) */
   letter-spacing: -0.02em;
   text-transform: none; /* ✅ avoids that heavy “shouty” look */
   text-align: center;
