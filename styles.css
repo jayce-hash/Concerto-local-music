@@ -72,13 +72,15 @@ body {
 }
 
 /* Main feature headline: EVENTS NEAR ME */
-.feature-title {
-  margin: 0 0 4px;
-  font-size: 1.45rem;
-  font-weight: 400;                /* not bold */
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.feature-title{
+  margin: 2px 0 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px;          /* match Festivals */
+  font-weight: 600;         /* match the loaded weight */
+  letter-spacing: -0.02em;  /* premium, not shouty */
+  text-transform: none;     /* IMPORTANT */
   text-align: center;
+  line-height: 1.12;
 }
 
 /* Short hero copy under Events Near Me */
