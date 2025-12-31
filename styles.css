@@ -642,3 +642,24 @@ input:focus {
   .brand-logo{ width: 92%; max-width: 340px; }
   .feature-title{ font-size: 24px; }
 }
+
+/* ============================================================
+   Header typography alignment with Festivals / Concerto+
+   ============================================================ */
+
+.feature-title{
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: none;           /* Festivals doesn't force uppercase */
+  margin: 2px 0 0;
+  text-align: center;
+}
+
+.tagline{
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 2px 0 12px;
+  max-width: 38ch;
+}
