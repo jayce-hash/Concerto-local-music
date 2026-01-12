@@ -1,7 +1,9 @@
 /* ============================================================
    Concerto — Events Near Me (LIGHT MODE ONLY)
-   Festivals / Featured Tours alignment (Inter-only)
-   Visual polish only (no functional changes)
+   FINAL POLISH PASS (matches Setlists/Featured Tours)
+   - Typography weights softened
+   - Spacing + rhythm refined
+   - No functional changes
    ============================================================ */
 
 :root{
@@ -33,11 +35,7 @@
 *::after{ box-sizing:border-box; }
 
 html,body{ height:100%; }
-
-html{
-  -webkit-text-size-adjust:100%;
-  text-size-adjust:100%;
-}
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 
 body{
   margin:0;
@@ -58,7 +56,7 @@ a{ color:inherit; text-decoration:none; }
 }
 
 /* ============================================================
-   Header (Festivals-style)
+   Header (match Setlists/Featured Tours)
    ============================================================ */
 
 .page-header{
@@ -87,10 +85,11 @@ a{ color:inherit; text-decoration:none; }
   display:block;
 }
 
+/* Slightly less heavy than before */
 .feature-title{
   margin:2px 0 0;
   font-size:28px;
-  font-weight:800;
+  font-weight:750;              /* was 800 */
   letter-spacing:-0.02em;
   line-height:1.12;
 }
@@ -103,9 +102,10 @@ a{ color:inherit; text-decoration:none; }
   max-width:52ch;
 }
 
-.header-actions{ margin-top:6px; }
+/* add a touch more breathing room like Setlists */
+.header-actions{ margin-top:10px; }
 
-/* Ghost button (matches Featured Tours / Setlists) */
+/* Ghost button (same language as other pages) */
 .btn-ghost{
   display:inline-flex;
   align-items:center;
@@ -120,6 +120,7 @@ a{ color:inherit; text-decoration:none; }
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
+  font-weight:600;              /* softer */
 }
 
 .btn-ghost:hover{ background:#F5F7FB; }
@@ -143,7 +144,7 @@ a{ color:inherit; text-decoration:none; }
   width:100%;
   max-width:680px;
   margin:0 auto;
-  padding:16px;
+  padding:18px 16px 16px;       /* a hair more top padding */
 }
 
 /* simple utility stacks (keeps your HTML intact) */
@@ -160,15 +161,14 @@ a{ color:inherit; text-decoration:none; }
 }
 
 /* ============================================================
-   Section typography
+   Section typography (soften weight)
    ============================================================ */
 
 .section-title{
   margin:0;
   font-size:var(--fs-14);
-  font-weight:750;
-  letter-spacing:.02em;
-  text-transform:none;
+  font-weight:700;              /* was 750 */
+  letter-spacing:.01em;         /* calmer */
 }
 
 .section-help{
@@ -193,12 +193,13 @@ a{ color:inherit; text-decoration:none; }
   gap:6px;
 }
 
+/* Labels were reading a little “shouty” — soften */
 label{
   font-size:var(--fs-12);
-  letter-spacing:.06em;
+  letter-spacing:.05em;
   text-transform:uppercase;
-  font-weight:650;
-  color:var(--muted);
+  font-weight:600;              /* was 650/700 */
+  color:rgba(94,107,134,.95);
 }
 
 .form-grid{
@@ -224,6 +225,7 @@ input[type="date"]{
   outline:none;
   box-shadow:var(--shadow2);
   -webkit-tap-highlight-color:transparent;
+  font-weight:500;              /* slight soften in fields */
 }
 
 input[type="date"]{
@@ -233,12 +235,13 @@ input[type="date"]{
 }
 
 input::placeholder{
-  color:rgba(94,107,134,.60);
+  color:rgba(94,107,134,.55);
+  font-weight:500;
 }
 
 input:focus{
-  border-color:rgba(31,43,74,.55);
-  box-shadow:0 0 0 2px rgba(31,43,74,.14), var(--shadow2);
+  border-color:rgba(31,43,74,.50);
+  box-shadow:0 0 0 2px rgba(31,43,74,.12), var(--shadow2);
 }
 
 .tiny{
@@ -276,12 +279,11 @@ input:focus{
   cursor:pointer;
   border-bottom:1px solid rgba(18,30,54,.06);
 }
-
 .suggest-item:last-child{ border-bottom:none; }
 .suggest-item:hover{ background:#F5F7FB; }
 
 /* ============================================================
-   Pills (categories + filters)
+   Pills (calmer weight + slightly lighter “chip” feel)
    ============================================================ */
 
 .pill-row{
@@ -297,7 +299,7 @@ input:focus{
   background:#fff;
   font-size:var(--fs-14);
   color:var(--ink);
-  font-weight:600;
+  font-weight:600;               /* was 700 */
   cursor:pointer;
   box-shadow:var(--shadow2);
   transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
@@ -311,10 +313,12 @@ input:focus{
   box-shadow:var(--shadow);
 }
 
+/* Active: keep premium navy but not “thick” */
 .pill.active{
   background:var(--accent);
   border-color:var(--accent);
   color:#fff;
+  font-weight:650;
 }
 
 /* ============================================================
@@ -326,6 +330,7 @@ input:focus{
   justify-content:flex-start;
 }
 
+/* Slightly tighter + cleaner */
 .filters-panel{
   margin-top:6px;
   padding-top:10px;
@@ -337,25 +342,28 @@ input:focus{
 
 .filters-panel[hidden]{ display:none; }
 
-.filters-block{ display:flex; flex-direction:column; gap:8px; }
+.filters-block{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
 
 .filters-block-title{
   font-size:var(--fs-12);
-  letter-spacing:.06em;
+  letter-spacing:.05em;
   text-transform:uppercase;
-  font-weight:700;
+  font-weight:650;               /* soften */
   color:var(--muted);
 }
 
 .sub-label{
   margin-top:2px;
   font-size:var(--fs-12);
-  font-weight:700;
-  letter-spacing:.02em;
+  font-weight:650;               /* soften */
+  letter-spacing:.01em;
   color:var(--ink);
 }
 
-/* Only show active set for category */
 .category-filters{ display:none; }
 .category-filters.active{ display:flex; }
 
@@ -377,7 +385,7 @@ input:focus{
   color:#fff;
   padding:12px 14px;
   font-size:var(--fs-15);
-  font-weight:700;
+  font-weight:700;               /* keep CTA strong */
   cursor:pointer;
   box-shadow:var(--shadow2);
   -webkit-tap-highlight-color:transparent;
@@ -412,7 +420,7 @@ input:focus{
   gap:12px;
 }
 
-/* Event card (clean, Festivals-ish) */
+/* Event card */
 .event-card{
   background:#fff;
   border:1px solid var(--line);
@@ -424,7 +432,7 @@ input:focus{
 .event-title{
   margin:0 0 6px;
   font-size:var(--fs-16);
-  font-weight:750;
+  font-weight:700;               /* was heavier */
   letter-spacing:.01em;
 }
 
@@ -469,7 +477,6 @@ input:focus{
   transform:translateY(-1px);
 }
 
-/* Make venue links look like normal text but tappable */
 .venue-link{
   color:inherit;
   text-decoration:none;
@@ -508,7 +515,7 @@ input:focus{
 
 .modal-title{
   font-size:var(--fs-18);
-  font-weight:800;
+  font-weight:750;               /* soften from 800 */
   letter-spacing:-.01em;
   color:var(--ink);
 }
@@ -538,6 +545,7 @@ input:focus{
   background:var(--accent);
   color:#fff;
   box-shadow:var(--shadow2);
+  font-weight:700;
 }
 
 .bullets{ margin:0; padding-left:18px; }
