@@ -89,7 +89,7 @@ a{ color:inherit; text-decoration:none; }
 .feature-title{
   margin:2px 0 0;
   font-size:28px;
-  font-weight:750;              /* was 800 */
+  font-weight:700;              /* was 800 */
   letter-spacing:-0.02em;
   line-height:1.12;
 }
