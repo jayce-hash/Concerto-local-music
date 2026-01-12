@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Events Near Me</title>
+  <title>Concerto · Events Near Me</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
-  <!-- Fonts (Festivals/Concerto+ aligned) -->
+  <!-- Fonts (Inter-only, Festivals/Concerto+ aligned) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -16,7 +16,7 @@
 <body>
   <div class="page">
 
-    <!-- Header (Festivals/Concerto+ vibe) -->
+    <!-- Header (Festivals / Featured Tours vibe) -->
     <header class="page-header">
       <div class="page-header-inner">
         <img
@@ -24,15 +24,15 @@
           alt="Concerto - From the Concert to the City"
           class="brand-logo"
         />
-        
+
         <h1 class="feature-title">Events Near Me</h1>
 
         <p class="tagline">
-          Discover Concerts, Sports, Comedy, Festivals, Theater, Nightlife, and Family Fun Around You.
+          Discover concerts, sports, comedy, festivals, theater, nightlife, and family fun around you.
         </p>
 
         <div class="header-actions">
-          <a class="btn-ghost" href="#" id="openHelp">How it works</a>
+          <a class="btn-ghost" href="#" id="openHelp" aria-label="How it works">How it works</a>
         </div>
       </div>
     </header>
@@ -86,10 +86,10 @@
             </div>
           </div>
 
-          <!-- Filters toggle (styled like Festivals ghost button) -->
+          <!-- Filters toggle (ghost pill) -->
           <div class="filters-toggle-row">
             <button type="button" id="toggleFilters" class="btn-ghost btn-ghost--small">
-              <span class="filter-icon">☰</span>
+              <span class="filter-icon" aria-hidden="true">☰</span>
               <span>Filters</span>
             </button>
           </div>
@@ -223,20 +223,21 @@
         <div class="results-header">
           <h2 class="section-title">Results</h2>
           <p id="resultsSummary" class="muted results-summary">
-            Enter a City &amp; State to See What’s Happening Nearby.
+            Enter a City &amp; State to see what’s happening nearby.
           </p>
         </div>
 
         <div id="events" class="events-list"></div>
       </section>
+
     </main>
   </div>
 
-  <!-- How it works modal (no main.js changes required) -->
+  <!-- How it works modal -->
   <div class="modal" id="modal" hidden>
     <div class="modal-backdrop" id="modalClose"></div>
-    <div class="modal-card">
-      <div class="modal-title">How Events Near Me Works</div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-title" id="modalTitle">How Events Near Me Works</div>
       <div class="modal-body">
         <ul class="bullets">
           <li>Enter a City &amp; State (or pick a suggestion).</li>
@@ -246,14 +247,14 @@
         </ul>
       </div>
       <div class="modal-actions">
-        <button class="primary-btn" id="modalOk">Got it</button>
+        <button class="primary-btn" id="modalOk" type="button">Got it</button>
       </div>
     </div>
   </div>
 
   <script src="main.js"></script>
 
-  <!-- tiny modal script -->
+  <!-- tiny modal script (UI-only) -->
   <script>
     (function () {
       const openBtn = document.getElementById("openHelp");
