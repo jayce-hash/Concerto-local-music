@@ -2,79 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Concerto · Events Near Me</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-
-  <!-- Fonts (Inter-only, Festivals/Concerto+ aligned) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <meta name="theme-color" content="#F8F9F9"/>
+  <title>Events Near Me — Concerto</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
-  <div class="page">
-
-    <!-- Header (Festivals / Featured Tours vibe) -->
-    <header class="page-header">
-      <div class="page-header-inner">
-        <img
-          src="IMG_3180.jpeg"
-          alt="Concerto - From the Concert to the City"
-          class="brand-logo"
-        />
-
-        <h1 class="feature-title">Events Near Me</h1>
-
-        <p class="tagline">
-          Discover concerts, sports, comedy, festivals, theater, nightlife, and family fun around you.
-        </p>
-
-        <div class="header-actions">
-          <a class="btn-ghost" href="#" id="openHelp" aria-label="How it works">How it works</a>
-        </div>
+  <div id="app">
+    <div class="topbar">
+      <div class="topbar-logo">
+        <span class="topbar-logo-word">CONCERTO - EVENTS</span>
+        <span class="topbar-logo-sub">A Premium Experience</span>
       </div>
-    </header>
+      <div class="topbar-right">
+        <button class="icon-btn" id="openHelp" title="How it works" aria-label="Help">?</button>
+      </div>
+    </div>
 
-    <main class="page-main">
+    <main class="scroll-area active" id="s-home">
+      
+      <section class="hero">
+        <div class="eyebrow">Local Discoveries.</div>
+        <h1 class="headline">Find events.<br><em>Right now.</em></h1>
+        <p class="sub">Discover concerts, sports, comedy, festivals, theater, nightlife, and family fun around you.</p>
+      </section>
 
-      <!-- Search / Controls -->
-      <section class="card search-card">
+      <section class="policy-card info-card" style="margin-bottom: 24px;">
         <div class="stack gap-16">
 
-          <div class="stack gap-6">
-            <h2 class="section-title">Find events</h2>
-            <p class="section-help">
-              Start with your city and date, then pick what you’re in the mood for.
-            </p>
-          </div>
-
-          <!-- City & State + Date -->
           <div class="form-grid">
-            <!-- City + State with suggestions -->
-            <div class="field suggest">
-              <label for="locationInput">City &amp; State</label>
+            <div class="field suggest dropdown-wrap" style="margin-bottom: 0;">
+              <label for="locationInput" class="field-label">City &amp; State</label>
               <input
                 type="text"
                 id="locationInput"
+                class="light-input"
                 placeholder="e.g. Nashville, TN"
                 autocomplete="off"
               />
-              <div id="locationSuggestions" class="suggest-list" hidden></div>
+              <div id="locationSuggestions" class="search-results suggest-list" hidden></div>
             </div>
 
-            <!-- Date -->
-            <div class="field">
-              <label for="dateInput">Date</label>
-              <input type="date" id="dateInput" />
-              <p class="tiny">Leave blank to see upcoming events.</p>
+            <div class="field dropdown-wrap" style="margin-bottom: 0;">
+              <label for="dateInput" class="field-label">Date</label>
+              <input type="date" id="dateInput" class="light-input" />
+              <p class="tiny" style="margin-top: 6px;">Leave blank for upcoming events.</p>
             </div>
           </div>
 
-          <!-- Category pills -->
-          <div class="field">
-            <label>What are you looking for?</label>
+          <div class="field" style="margin-top: 10px;">
+            <label class="field-label">What are you looking for?</label>
             <div class="pill-row" id="categoryFilters">
               <button type="button" class="pill active" data-cat="music">Live Music</button>
               <button type="button" class="pill" data-cat="sports">Sports</button>
@@ -86,21 +69,16 @@
             </div>
           </div>
 
-          <!-- Filters toggle (ghost pill) -->
-          <div class="filters-toggle-row">
-            <button type="button" id="toggleFilters" class="btn-ghost btn-ghost--small">
-              <span class="filter-icon" aria-hidden="true">☰</span>
-              <span>Filters</span>
+          <div class="filters-toggle-row" style="margin-top: 4px;">
+            <button type="button" id="toggleFilters" class="action-btn ghost" style="padding: 10px 16px; width: auto; font-size: 12px;">
+              <span>Filters ↓</span>
             </button>
           </div>
 
-          <!-- Filters Panel -->
           <div id="moreFilters" class="filters-panel" hidden>
 
-            <!-- Live Music -->
             <div class="filters-block category-filters active" data-category="music">
               <div class="filters-block-title">Live music filters</div>
-
               <div class="sub-label">Genre</div>
               <div class="pill-row" id="musicGenreFilters">
                 <button type="button" class="pill" data-genre="pop">Pop</button>
@@ -113,8 +91,7 @@
                 <button type="button" class="pill" data-genre="jazz">Jazz</button>
                 <button type="button" class="pill" data-genre="latin">Latin</button>
               </div>
-
-              <div class="sub-label">Venue type</div>
+              <div class="sub-label" style="margin-top: 10px;">Venue type</div>
               <div class="pill-row" id="musicVenueFilters">
                 <button type="button" class="pill" data-venue-size="small">Bars &amp; Clubs</button>
                 <button type="button" class="pill" data-venue-size="mid">Theaters &amp; Music Halls</button>
@@ -122,10 +99,8 @@
               </div>
             </div>
 
-            <!-- Sports -->
             <div class="filters-block category-filters" data-category="sports">
               <div class="filters-block-title">Sports filters</div>
-
               <div class="sub-label">Sport</div>
               <div class="pill-row" id="sportsTypeFilters">
                 <button type="button" class="pill" data-sport="basketball">Basketball</button>
@@ -135,8 +110,7 @@
                 <button type="button" class="pill" data-sport="soccer">Soccer</button>
                 <button type="button" class="pill" data-sport="other">Other</button>
               </div>
-
-              <div class="sub-label">Level</div>
+              <div class="sub-label" style="margin-top: 10px;">Level</div>
               <div class="pill-row" id="sportsLevelFilters">
                 <button type="button" class="pill active" data-level="any">Any</button>
                 <button type="button" class="pill" data-level="pro">Pro</button>
@@ -144,10 +118,8 @@
               </div>
             </div>
 
-            <!-- Comedy -->
             <div class="filters-block category-filters" data-category="comedy">
               <div class="filters-block-title">Comedy filters</div>
-
               <div class="sub-label">Type</div>
               <div class="pill-row" id="comedyTypeFilters">
                 <button type="button" class="pill" data-comedy="standup">Stand-up</button>
@@ -156,10 +128,8 @@
               </div>
             </div>
 
-            <!-- Festivals -->
             <div class="filters-block category-filters" data-category="festivals">
               <div class="filters-block-title">Festival filters</div>
-
               <div class="sub-label">Type</div>
               <div class="pill-row" id="festivalTypeFilters">
                 <button type="button" class="pill" data-fest="music">Music festivals</button>
@@ -168,10 +138,8 @@
               </div>
             </div>
 
-            <!-- Theater -->
             <div class="filters-block category-filters" data-category="theater">
               <div class="filters-block-title">Theater filters</div>
-
               <div class="sub-label">Type</div>
               <div class="pill-row" id="theaterTypeFilters">
                 <button type="button" class="pill" data-theater="musical">Musicals</button>
@@ -180,10 +148,8 @@
               </div>
             </div>
 
-            <!-- Nightlife -->
             <div class="filters-block category-filters" data-category="nightlife">
               <div class="filters-block-title">Nightlife filters</div>
-
               <div class="sub-label">Type</div>
               <div class="pill-row" id="nightlifeTypeFilters">
                 <button type="button" class="pill" data-nightlife="bars">Bars &amp; lounges</button>
@@ -194,10 +160,8 @@
               </div>
             </div>
 
-            <!-- Family + Kids -->
             <div class="filters-block category-filters" data-category="family">
               <div class="filters-block-title">Family + kids filters</div>
-
               <div class="sub-label">Type</div>
               <div class="pill-row" id="familyTypeFilters">
                 <button type="button" class="pill" data-family="familyshows">Family shows</button>
@@ -209,36 +173,33 @@
 
           </div>
 
-          <!-- Search button + status -->
-          <div class="search-actions">
-            <button type="button" id="searchBtn" class="btn-primary">Search</button>
-            <div id="status" class="status muted"></div>
+          <div class="search-actions" style="margin-top: 14px;">
+            <button type="button" id="searchBtn" class="primary-btn">Search Events</button>
+            <div id="status" class="status tiny" style="text-align: center; margin-top: 8px;"></div>
           </div>
 
         </div>
       </section>
 
-      <!-- Results -->
       <section class="results">
-        <div class="results-header">
-          <h2 class="section-title">Results</h2>
-          <p id="resultsSummary" class="muted results-summary">
+        <div class="results-header" style="margin-bottom: 16px;">
+          <h2 class="section-title" style="font-family: var(--display); font-size: 24px;">Results</h2>
+          <p id="resultsSummary" class="tiny results-summary">
             Enter a City &amp; State to see what’s happening nearby.
           </p>
         </div>
 
-        <div id="events" class="events-list"></div>
+        <div id="events" class="events-list grid"></div>
       </section>
 
     </main>
   </div>
 
-  <!-- How it works modal -->
   <div class="modal" id="modal" hidden>
     <div class="modal-backdrop" id="modalClose"></div>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-title" id="modalTitle">How Events Near Me Works</div>
-      <div class="modal-body">
+      <div class="modal-title headline" id="modalTitle" style="font-size: 28px;">How Events Near Me Works</div>
+      <div class="modal-body sub">
         <ul class="bullets">
           <li>Enter a City &amp; State (or pick a suggestion).</li>
           <li>Pick a category like Nightlife or Family + Kids.</li>
@@ -246,7 +207,7 @@
           <li>Tap Tickets / Info to open Ticketmaster.</li>
         </ul>
       </div>
-      <div class="modal-actions">
+      <div class="modal-actions" style="margin-top: 20px;">
         <button class="primary-btn" id="modalOk" type="button">Got it</button>
       </div>
     </div>
@@ -254,7 +215,6 @@
 
   <script src="main.js"></script>
 
-  <!-- tiny modal script (UI-only) -->
   <script>
     (function () {
       const openBtn = document.getElementById("openHelp");
